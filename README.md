@@ -121,7 +121,7 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 ### Estado del despliegue
 
 - [x] Repositorio creado
-- [ ] GitHub Pages activado
+- [x] GitHub Pages activado
 - [ ] D1 creada y `database_id` puesto en `worker/wrangler.jsonc`
 - [ ] Tablas creadas (`schema.sql`)
 - [ ] Worker conectado a GitHub y desplegado
