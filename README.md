@@ -129,4 +129,5 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 10. **Caché**: el service worker (`sw.js`) va primero a la red con `cache: 'no-cache'` (revalida siempre, sin usar la caché HTTP de GitHub Pages) y solo usa lo guardado sin conexión. Al desplegar un cambio relevante, subir el número de `CACHE` en `sw.js`; la app busca versión nueva en cada visita y se recarga sola una vez.
 11. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
 12. **Cambios que dependan de la base de datos** (columnas o tablas nuevas, o borrar datos): dar primero el SQL, esperar a que el usuario diga "listo" y solo entonces subir el código.
-13. Commits a `main` (despliegan solos). Mensajes claros en español.
+13. **Antes de decir que algo está implantado, comprobar en el repo que está desplegado** (build de GitHub Pages terminado y contenido publicado; despliegue del Worker si cambió). Mientras no lo esté, esperar y no avisar. Solo entonces decirle al usuario que pruebe.
+14. Commits a `main` (despliegan solos). Mensajes claros en español.
