@@ -156,9 +156,10 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 7. **Proxy siempre entre la PWA y el Worker** (Netlify, ruta `atlas-earth`). El Worker no añade CORS.
 8. **No inventar datos del juego.** Atlas Earth no tiene API pública: los datos los apunta el usuario. Lo que no se sepa (costes, reglas del juego…) se pregunta o se deja configurable.
 9. **Cuentas gratuitas**: no usar nada que requiera pago.
-10. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
-11. **Cambios que dependan de la base de datos** (columnas o tablas nuevas): dar primero el SQL, esperar a que el usuario diga "listo" y solo entonces subir el código.
-12. Commits a `main` (despliegan solos). Mensajes claros en español.
+10. **Caché**: el service worker (`sw.js`) va primero a la red con `cache: 'no-cache'` (revalida siempre, sin usar la caché HTTP de GitHub Pages) y solo usa lo guardado sin conexión. Al desplegar un cambio relevante, subir el número de `CACHE` en `sw.js`; la app busca versión nueva en cada visita y se recarga sola una vez.
+11. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
+12. **Cambios que dependan de la base de datos** (columnas o tablas nuevas): dar primero el SQL, esperar a que el usuario diga "listo" y solo entonces subir el código.
+13. Commits a `main` (despliegan solos). Mensajes claros en español.
 
 ## Pendiente / ideas
 

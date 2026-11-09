@@ -1,6 +1,7 @@
-// Service worker: red primero y, si no hay conexión, lo último que se guardó.
+// Service worker: red primero (siempre revalidando, sin usar la caché HTTP del navegador)
+// y, si no hay conexión, lo último que se guardó.
 // No hay lista de ficheros que mantener: guarda lo que la app va pidiendo.
-const CACHE = 'atlas-tracker-v1';
+const CACHE = 'atlas-tracker-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting());
@@ -21,7 +22,7 @@ self.addEventListener('fetch', (event) => {
   if (new URL(request.url).origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(request)
+    fetch(request, { cache: 'no-cache' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE).then((cache) => cache.put(request, copy));
