@@ -1,6 +1,6 @@
 # Atlas Tracker
 
-PWA personal para llevar la cuenta de mi dinero en el juego móvil **Atlas Earth**: cuánto tengo acumulado y cuánto gano al día y al mes según las parcelas que tengo.
+PWA personal para llevar la cuenta de mi dinero en el juego móvil **Atlas Earth**: cuánto llevo ganado, cuánto tengo para gastar y cuánto gano al día y al mes según las parcelas que tengo.
 
 > **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · el repo está vacío de código; este README define el alcance para empezar de nuevo.
 
@@ -8,9 +8,13 @@ PWA personal para llevar la cuenta de mi dinero en el juego móvil **Atlas Earth
 
 Para tener **mis números claros y realistas**. No sustituye a la app del juego: no sirve para canjear dinero ni para jugar. Sus tres cosas son:
 
-1. **Mi dinero acumulado**: lo que llevo acumulado en el juego, que va subiendo solo con lo que gano.
-2. **Mi dinero real**: pendiente de definir (ver [Punto abierto](#punto-abierto)).
+1. **Renta total acumulada** (en $): todo lo que llevo ganado desde el inicio. Es la cifra *"Renta total acumulada"* de la pantalla *Información del jugador* del juego. Nunca baja.
+2. **Saldo disponible** (en $): lo que tengo ahora mismo para gastar en parcelas o lo que quiera. Es la cifra de la parte superior de la pantalla principal del juego. Sube con lo que gano y baja cuando lo gasto.
 3. **Lo que gano al día**, calculado a partir de mis parcelas.
+
+La diferencia **Renta total acumulada − Saldo disponible** es lo que ya he **gastado** (canjeado por Atlas Bucks u otras cosas). Ejemplo real del 2026-11-09: 16,2263… $ − 0,2263… $ = 16 $ gastados.
+
+Las dos cifras se apuntan a mano, y entre apuntes la app las estima sumando lo ganado desde entonces (las dos suben al mismo ritmo).
 
 ### Mis parcelas (el corazón de la app)
 
@@ -23,7 +27,8 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 - Lo que gano **al día** y **al mes** con mis parcelas actuales.
 - Desglose por tipo: cuánto aporta cada tipo al día y al mes.
 - Ganancia media por parcela.
-- El dinero acumulado **estimado en este momento**: último valor apuntado + lo ganado desde entonces.
+- La **renta total acumulada** y el **saldo disponible estimados en este momento**: último valor apuntado + lo ganado desde entonces.
+- Lo **gastado** hasta ahora (renta total acumulada − saldo disponible).
 
 ### Fuera de alcance (por ahora)
 
@@ -34,6 +39,7 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 ## Datos del juego confirmados
 
 - Moneda: **dólares ($)**.
+- Los tipos de parcela son **Común, Raro, Épico y Legendario**. Mi cuenta el 2026-11-09: 28 Comunes, 15 Raras, 9 Épicas y 4 Legendarias (56 en total).
 - Hay parcelas de **distintos tipos** que dan distinta ganancia; el juego la muestra por segundo.
 - 1 $ de renta = 25 Atlas Bucks; una parcela = 100 AB = 4 $. *(Dato confirmado, hoy sin uso.)*
 
@@ -41,12 +47,8 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 - Ganancia al día = Σ (parcelas del tipo × $ por segundo × 86.400).
 - Ganancia al mes = ganancia al día × 30,44.
-- El dinero acumulado mostrado es una **estimación** entre dos apuntes.
+- La renta total acumulada y el saldo disponible mostrados son una **estimación** entre dos apuntes.
 - No se inventan datos del juego: todo lo que no se sabe se configura o se pregunta.
-
-## Punto abierto
-
-Falta definir qué es **"dinero real"** en la app (por ejemplo: dinero ya cobrado en la vida real, o el equivalente en euros del acumulado). Hasta que se aclare no se diseña esa parte.
 
 ## Infraestructura que ya existe
 
