@@ -27,6 +27,10 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 En Safari (iPhone): abrir la URL → botón *Compartir* → *Añadir a pantalla de inicio*. Se instala con el nombre **Atlas Tracker** y el icono elegido (monograma A con flecha dorada, creado para esta app; el icono es propio, no copia el del juego). Si se cambia el icono, hay que borrar la app de la pantalla de inicio y volver a añadirla.
 
+### Comportamiento táctil
+
+Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bloqueo de los gestos de Safari) y sin rebote al llegar al principio o final (`overscroll-behavior: none`). Los campos de texto usan 18 px para que Safari no haga zoom al escribir. Quitar el zoom resta accesibilidad: si hiciera falta, revertir estos tres puntos.
+
 ### Cómo funciona el contador
 
 - Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.

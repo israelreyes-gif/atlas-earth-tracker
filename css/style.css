@@ -16,6 +16,9 @@
 
 html, body {
   margin: 0;
+  overscroll-behavior: none; /* sin rebote al llegar al principio o al final */
+  touch-action: pan-x pan-y; /* sin pellizco para hacer zoom */
+  -webkit-text-size-adjust: 100%;
   background: var(--bg);
   color: var(--ink);
   font-family: 'Inter', system-ui, sans-serif;

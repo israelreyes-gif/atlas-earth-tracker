@@ -60,6 +60,17 @@ async function start(message = '') {
 
 window.addEventListener('hashchange', show);
 
+// Safari de iPhone: sin pellizco ni zoom con doble toque.
+['gesturestart', 'gesturechange', 'gestureend'].forEach((name) => {
+  document.addEventListener(name, (event) => event.preventDefault());
+});
+let lastTouchEnd = 0;
+document.addEventListener('touchend', (event) => {
+  const now = Date.now();
+  if (now - lastTouchEnd < 300) event.preventDefault();
+  lastTouchEnd = now;
+}, { passive: false });
+
 // Service worker: se busca una versión nueva en cada visita y, si la hay, se recarga una vez.
 if ('serviceWorker' in navigator) {
   const hadController = Boolean(navigator.serviceWorker.controller);
