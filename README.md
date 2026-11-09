@@ -71,7 +71,6 @@ js/
     home.js evolution.js goals.js purchases.js update.js settings.js login.js empty.js
 worker/
   wrangler.jsonc            Configuración del Worker y enlace con D1 (binding DB)
-  schema.sql                Tablas de D1
   src/
     index.js                Entrada: valida clave y reparte la acción
     auth.js json.js validate.js
@@ -81,7 +80,13 @@ worker/
 
 ## Datos (D1)
 
-Esquema en `worker/schema.sql`.
+Las tablas se crean a mano en la consola de D1 (no hay fichero de esquema en el repo). **Si cambia una tabla, se actualiza aquí y se avisa para ejecutar el cambio en la consola.** SQL con el que se crearon:
+
+```sql
+CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, taken_at TEXT NOT NULL, parcels INTEGER NOT NULL, daily_income REAL NOT NULL, balance REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS goals (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, target REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+```
 
 - **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` (€), `balance` (€). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
 - **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Retirar X €" no se guarda: sale de los ajustes.
@@ -112,7 +117,7 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 
 1. **Repositorio** `israelreyes-gif/atlas-earth-tracker` (público) — ✅ hecho.
 2. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / `(root)`*. La app queda en `https://israelreyes-gif.github.io/atlas-earth-tracker/`.
-3. **D1**: en Cloudflare, *Storage & databases → D1 → Create database* con el nombre `atlas-earth-tracker`. Copiar su *Database ID*, pegarlo en `worker/wrangler.jsonc` (campo `database_id`) y, en la pestaña *Console* de la base de datos, ejecutar el contenido de `worker/schema.sql`.
+3. **D1**: en Cloudflare, *Storage & databases → D1 → Create database* con el nombre `atlas-earth-tracker`. Copiar su *Database ID*, pegarlo en `worker/wrangler.jsonc` (campo `database_id`) y, en la pestaña *Console* de la base de datos, ejecutar el SQL de la sección [Datos (D1)](#datos-d1).
 4. **Worker desde GitHub**: *Workers & Pages → Create → Import a repository* → elegir este repo. *Root directory*: `worker`. Cada commit en `main` despliega solo.
 5. **Secreto**: en el Worker, *Settings → Variables and Secrets → Add* → tipo *Secret*, nombre `API_KEY`, valor = la clave que se vaya a escribir en la app.
 6. **Proxy de Netlify**: en el repo del proxy, fichero `netlify/edge-functions/proxy.ts`, añadir al mapa `RUTAS` la línea `'atlas-earth': '<URL del Worker>'` y hacer commit en `main`.
@@ -123,7 +128,7 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 - [x] Repositorio creado
 - [x] GitHub Pages activado
 - [x] D1 creada y `database_id` puesto en `worker/wrangler.jsonc`
-- [ ] Tablas creadas (`schema.sql`)
+- [x] Tablas creadas en la consola de D1
 - [ ] Worker conectado a GitHub y desplegado
 - [ ] Secreto `API_KEY` creado
 - [ ] Ruta `atlas-earth` añadida al proxy
