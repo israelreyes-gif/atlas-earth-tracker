@@ -12,7 +12,7 @@ PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gan
 | **Evolución** | Gráfica de la ganancia diaria (3 meses, 6 meses o 1 año), estadísticas y lista de registros (se pueden borrar). |
 | **Objetivos** | Fecha estimada para cada meta: canjear el mínimo, juntar dinero, llegar a N parcelas o a X $/día. Ritmo de compra ajustable con un deslizador. |
 | **Cobrar** | Réplica adaptada de la pantalla *Ingresos acumulados* del juego: ingresos acumulados en directo con barra hacia el mínimo, cuándo se puede canjear por dinero real y, para pasarlos a Atlas Bucks, un selector de parcelas con botones grandes + y − (y "todas las que me llegan") que compara comprar ahora con esperar a canjear. |
-| **Ajustes** | Valores del juego editables (mínimo para canjear: 5 $; Atlas Bucks por 1 $: 25; Atlas Bucks por parcela: 100) y cerrar sesión en el dispositivo. |
+| **Ajustes** | Tipos de parcela (nombre y $ por segundo como los muestra el juego), multiplicador de boosts/pasaporte, valores del juego editables (mínimo para canjear: 5 $; Atlas Bucks por 1 $: 25; Atlas Bucks por parcela: 100) y cerrar sesión en el dispositivo. |
 
 ### Reglas del juego usadas (confirmadas por el usuario)
 
@@ -20,11 +20,13 @@ PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gan
 - Los ingresos acumulados se pueden **canjear por dinero real a partir de 5 $** (pantalla *Ingresos acumulados* del juego).
 - **1 $ de renta = 25 Atlas Bucks (AB)**; **una parcela = 100 AB = 4 $** de renta.
 - Estos tres valores viven en Ajustes (tabla `settings`), no en el código.
-- Aún **sin confirmar** y por eso no usados: tipos de parcela con sus ganancias, boosts x20/x50 y pasaporte, insignias.
+- **Tipos de parcela**: los define el usuario en Ajustes (nombre + $ por segundo, tal como lo ve en el juego). La app multiplica por 86.400 para pasarlo a $ al día y por el *multiplicador* (por defecto 1).
+- Al guardar un registro, la ganancia diaria se calcula con los tipos pero **se puede corregir a mano** con la cifra real del juego.
+- Aún **sin confirmar** y por eso no automatizados: cómo se aplican los boosts x20/x50 y el pasaporte (de ahí el multiplicador manual) e insignias.
 
 ### No hay conexión con la cuenta de Atlas Earth
 
-Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no lee la cuenta: **los datos se apuntan a mano** con el botón *Actualizar mis parcelas* (parcelas, ganancia diaria y saldo, copiados de la app del juego). Cuantas más veces se apunte, mejor sale la evolución.
+Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no lee la cuenta: **los datos se apuntan a mano** con el botón *Actualizar mis parcelas* (parcelas, ganancia diaria y saldo, copiados de la app del juego). Con tipos de parcela definidos, se apunta cuántas hay de cada tipo con **+ y −**. Cuantas más veces se apunte, mejor sale la evolución.
 
 ### Supuestos de los cálculos
 
@@ -91,14 +93,16 @@ worker/
 Las tablas se crean a mano en la consola de D1 (no hay fichero de esquema en el repo). **Si cambia una tabla, se actualiza aquí y se avisa para ejecutar el cambio en la consola.** SQL con el que se crearon:
 
 ```sql
-CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, taken_at TEXT NOT NULL, parcels INTEGER NOT NULL, daily_income REAL NOT NULL, balance REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, taken_at TEXT NOT NULL, parcels INTEGER NOT NULL, daily_income REAL NOT NULL, balance REAL NOT NULL, counts TEXT);
 CREATE TABLE IF NOT EXISTS goals (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, target REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 ```
 
-- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` ($), `balance` ($, ingresos acumulados). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
+Si la tabla `snapshots` ya existía sin `counts`, ejecutar una sola vez: `ALTER TABLE snapshots ADD COLUMN counts TEXT;`
+
+- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` ($), `balance` ($, ingresos acumulados), `counts` (JSON `{idTipo: cantidad}`, opcional). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
 - **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Canjear X $" no se guarda: sale de los ajustes.
-- **settings**: `key`, `value`. `withdraw_threshold` (5), `ab_per_dollar` (25) y `parcel_ab` (100). Si falta alguno, la app usa esos valores por defecto.
+- **settings**: `key`, `value`. `withdraw_threshold` (5), `ab_per_dollar` (25), `parcel_ab` (100), `income_multiplier` (1) y `parcel_types` (JSON `[{id, name, rate}]`, `rate` = $/segundo). Si falta alguno, la app usa esos valores por defecto.
 
 ## API del Worker
 
@@ -110,12 +114,12 @@ Siempre `POST` a la URL del Worker (a través del proxy) con cuerpo `text/plain`
 
 | Acción | Payload | Respuesta |
 |---|---|---|
-| `getAll` | — | `{ settings, snapshots, goals }` |
-| `addSnapshot` | `{ taken_at, parcels, daily_income, balance }` | `{ id }` |
+| `getAll` | — | `{ settings, parcel_types, snapshots, goals }` |
+| `addSnapshot` | `{ taken_at, parcels, daily_income, balance, counts? }` | `{ id }` |
 | `deleteSnapshot` | `{ id }` | `{ ok }` |
 | `addGoal` | `{ type, target }` | `{ id }` |
 | `deleteGoal` | `{ id }` | `{ ok }` |
-| `saveSettings` | uno o varios de `{ withdraw_threshold, ab_per_dollar, parcel_ab }` | `{ ok }` |
+| `saveSettings` | uno o varios de `{ withdraw_threshold, ab_per_dollar, parcel_ab, income_multiplier, parcel_types }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 

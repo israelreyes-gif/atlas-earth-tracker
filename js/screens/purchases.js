@@ -1,6 +1,8 @@
 // Cobrar: ingresos acumulados, canjear por dinero real (desde el mínimo) o pasarlos a Atlas Bucks para comprar parcelas.
 import { addDays, analyzePurchase, daysToReach, estimatedBalance, incomePerParcel, latestSnapshot } from '../calc.js';
 import { formatDay, formatDays, formatDollar, formatNumber, parseNumber } from '../format.js';
+import { dailyPerParcel } from '../parcel-types.js';
+import { escapeHtml } from '../html.js';
 import { state } from '../store.js';
 import { emptyHtml } from './empty.js';
 
@@ -44,7 +46,7 @@ function verdictHtml(result, balance, cost) {
       <p>${body}</p>
       ${funds}
     </section>
-    <p class="muted small">Estimación con lo que ganas de media por parcela, porque una parcela nueva puede ser de cualquier tipo.</p>`;
+    <p class="muted small">Estimación con el tipo de parcela elegido o, si no eliges, con lo que ganas de media por parcela.</p>`;
 }
 
 export function renderPurchases(container) {
@@ -80,6 +82,13 @@ export function renderPurchases(container) {
     <section class="card" aria-labelledby="ab-title">
       <span class="title" id="ab-title">Pasar a Atlas Bucks y comprar parcelas</span>
       <p class="muted">1 $ = ${formatNumber(abPerDollar)} AB · una parcela = ${formatNumber(parcelAb)} AB (${formatDollar(parcelCost)})</p>
+      ${state.parcelTypes.length ? `<div class="field">
+        <label for="type">Tipo de parcela que compras</label>
+        <select id="type">
+          <option value="">Media de mis parcelas</option>
+          ${state.parcelTypes.map((type) => `<option value="${escapeHtml(type.id)}">${escapeHtml(type.name)}</option>`).join('')}
+        </select>
+      </div>` : ''}
       <div class="field">
         <label for="parcels">Parcelas a comprar</label>
         <div class="stepper">
@@ -107,10 +116,17 @@ export function renderPurchases(container) {
   const accEta = container.querySelector('#acc-eta');
   const cashStatus = container.querySelector('#cash-status');
   const parcelsInput = container.querySelector('#parcels');
+  const typeSelect = container.querySelector('#type');
   const maxButton = container.querySelector('#max');
   const costEl = container.querySelector('#cost');
   const extraEl = container.querySelector('#extra');
   const resultEl = container.querySelector('#result');
+
+  // Lo que daría cada parcela nueva: la del tipo elegido o la media actual.
+  function perParcelNow() {
+    const type = typeSelect ? state.parcelTypes.find((item) => item.id === typeSelect.value) : null;
+    return type ? dailyPerParcel(type, state.settings.income_multiplier) : incomePerParcel(snapshot);
+  }
 
   const maxParcels = (balance) => Math.max(0, Math.floor(balance / parcelCost));
 
@@ -154,7 +170,7 @@ export function renderPurchases(container) {
     const result = analyzePurchase({
       cost,
       parcels,
-      perParcel: incomePerParcel(snapshot),
+      perParcel: perParcelNow(),
       balance,
       dailyIncome: snapshot.daily_income,
       threshold,
@@ -182,6 +198,7 @@ export function renderPurchases(container) {
     setParcels(maxParcels(estimatedBalance(snapshot, new Date())));
   });
   parcelsInput.addEventListener('input', update);
+  if (typeSelect) typeSelect.addEventListener('change', update);
 
   tick();
   update();

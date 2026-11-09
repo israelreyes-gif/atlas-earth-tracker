@@ -1,6 +1,8 @@
 // Inicio: contador de ganancia diaria y próximo canjeo.
 import { dayFractionElapsed, daysToReach, addDays, earnedToday, estimatedBalance, incomePerParcel, latestSnapshot } from '../calc.js';
 import { formatDay, formatDays, formatDollar, formatNumber, formatToday } from '../format.js';
+import { countsOf, dailyPerParcel } from '../parcel-types.js';
+import { escapeHtml } from '../html.js';
 import { state } from '../store.js';
 import { emptyHtml } from './empty.js';
 
@@ -16,6 +18,13 @@ export function renderHome(container) {
   const threshold = state.settings.withdraw_threshold;
   const perParcel = incomePerParcel(snapshot);
   const daily = snapshot.daily_income;
+  const counts = countsOf(snapshot);
+  const rows = state.parcelTypes.filter((type) => (counts[type.id] ?? 0) > 0);
+  const breakdown = rows.length ? `
+    <section class="card" aria-label="Parcelas por tipo">
+      <span class="title">Tus parcelas por tipo</span>
+      ${rows.map((type) => `<div class="breakdown-row"><span>${escapeHtml(type.name)}: ${formatNumber(counts[type.id])}</span><span class="muted">${formatDollar(counts[type.id] * dailyPerParcel(type, state.settings.income_multiplier), 4)} al día</span></div>`).join('')}
+    </section>` : '';
 
   container.innerHTML = `
     <div class="row between baseline">
@@ -49,6 +58,8 @@ export function renderHome(container) {
       <div class="stat"><span class="value">${formatDollar(daily * 30)}</span><span class="label">Al mes</span></div>
       <div class="stat"><span class="value">${formatDollar(daily * 365, 0)}</span><span class="label">Al año</span></div>
     </div>
+
+    ${breakdown}
 
     <a class="card card-link" href="#purchases" aria-label="Próximo canjeo: ver ingresos acumulados y opciones de cobro">
       <div class="row between">

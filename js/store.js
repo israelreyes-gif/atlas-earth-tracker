@@ -4,10 +4,11 @@ import { api } from './api.js';
 const CACHE_KEY = 'atlas-tracker-cache-v1';
 
 // Valores del juego confirmados: mínimo 5 $, 1 $ = 25 AB, parcela = 100 AB.
-const DEFAULT_SETTINGS = { withdraw_threshold: 5, ab_per_dollar: 25, parcel_ab: 100 };
+const DEFAULT_SETTINGS = { withdraw_threshold: 5, ab_per_dollar: 25, parcel_ab: 100, income_multiplier: 1 };
 
 export const state = {
   settings: { ...DEFAULT_SETTINGS },
+  parcelTypes: [],
   snapshots: [],
   goals: [],
   offline: false,
@@ -15,6 +16,7 @@ export const state = {
 
 function apply(data) {
   state.settings = { ...DEFAULT_SETTINGS, ...data.settings };
+  state.parcelTypes = data.parcel_types ?? [];
   state.snapshots = data.snapshots;
   state.goals = data.goals;
 }
