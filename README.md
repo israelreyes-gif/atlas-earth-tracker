@@ -121,7 +121,7 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 4. **Worker desde GitHub**: *Workers & Pages → Create → Import a repository* → elegir este repo. *Root directory*: `worker`. Cada commit en `main` despliega solo.
    - URL del Worker: `https://atlas-earth-tracker.israel-reyes.workers.dev`. La dirección `workers.dev` debe estar activada (en `wrangler.jsonc`: `workers_dev: true`; en el panel, *Settings → Domains & Routes*, interruptor *Production*).
 5. **Secreto**: en el Worker, *Settings → Variables and Secrets → Add* → tipo *Secret*, nombre `API_KEY`, valor = la clave que se vaya a escribir en la app.
-6. **Proxy de Netlify**: en el repo del proxy, fichero `netlify/edge-functions/proxy.ts`, añadir al mapa `RUTAS` la línea `'atlas-earth': '<URL del Worker>'` y hacer commit en `main`.
+6. **Proxy de Netlify**: en el repo del proxy (`israelreyes-gif/api-proxy`, privado), fichero `netlify/edge-functions/proxy.ts`, añadir al mapa `RUTAS` la línea `'atlas-earth': '<URL del Worker>'` y hacer commit en `main`.
 7. **Probar**: abrir la app, escribir la clave, pulsar *Actualizar mis parcelas* y guardar el primer registro.
 
 ### Estado del despliegue
@@ -132,7 +132,7 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 - [x] Tablas creadas en la consola de D1
 - [x] Worker conectado a GitHub y desplegado
 - [x] Secreto `API_KEY` creado
-- [ ] Ruta `atlas-earth` añadida al proxy
+- [x] Ruta `atlas-earth` añadida al proxy (repo `israelreyes-gif/api-proxy`)
 - [ ] Primer registro guardado desde la app
 
 ## Reglas del proyecto
