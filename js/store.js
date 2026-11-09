@@ -59,8 +59,3 @@ export async function persist(extra = {}) {
   });
   saveCache({ types, account });
 }
-
-export const saveRates = async (rates) => {
-  await api.saveRates(rates);
-  await loadAll();
-};

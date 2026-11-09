@@ -5,14 +5,12 @@ import { loadAll } from './store.js';
 import { renderHome } from './screens/home.js';
 import { renderLogin } from './screens/login.js';
 import { renderMoney } from './screens/money.js';
-import { renderSettings } from './screens/settings.js';
 
 const screen = document.querySelector('#screen');
 
 const ROUTES = {
   home: renderHome,
   money: renderMoney,
-  settings: renderSettings,
 };
 
 let ready = false;

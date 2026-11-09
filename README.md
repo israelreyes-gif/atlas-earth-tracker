@@ -19,9 +19,8 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. |
+| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. No hay pantalla de ajustes: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
 | **Corregir el dinero** (`#money`) | Para volver a apuntar las dos cifras de dinero con las que muestra el juego. |
-| **Ajustes** (`#settings`) | Lo que da por segundo cada tipo de parcela (como en el juego) y cerrar sesión. |
 
 ### Instalar como app (PWA)
 
@@ -34,8 +33,8 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
 ### Cómo funciona el contador
 
 - Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.
-- D1 solo se escribe cuando **cambio algo**: pulso + o − (se guarda 0,8 s después del último toque), corrijo el dinero o cambio las tarifas.
-- Al pulsar + o −, y al cambiar tarifas, la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
+- D1 solo se escribe cuando **cambio algo**: pulso + o − (se guarda 0,8 s después del último toque) o corrijo el dinero.
+- Al pulsar + o −, la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
 - Es una **estimación con las tarifas base**: sin boosts ni pasaporte, así que sale por debajo de lo real. Si difiere del juego, se corrige en *Corregir el dinero*.
 
 ### Fuera de alcance (por ahora)
@@ -49,7 +48,7 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
 - Moneda: **dólares ($)**.
 - Tipos de parcela: **Común, Raro, Épico y Legendario**. Cuenta del 2026-11-09: 28, 15, 9 y 4 (56 en total).
 - El juego muestra lo que da cada parcela **por segundo**; la app lo pasa a día (× 86.400) y a mes (× 30,44).
-- Tarifas base por segundo cargadas al principio (de la captura de rarezas; revisables en Ajustes): Común 0,0000000011 · Raro 0,0000000016 · Épico 0,0000000022 · Legendario 0,0000000044.
+- Tarifas base por segundo (de la captura de rarezas; fijas, solo se cambian en la base de datos): Común 0,0000000011 · Raro 0,0000000016 · Épico 0,0000000022 · Legendario 0,0000000044.
 - **Boost x20 confirmado** (2026-11-09): con él activo, el saldo subió unos 0,17 $/día frente a los 0,008 $/día del cálculo base (≈ x21, es decir x20 más el +5 % de insignias, a falta de confirmar cómo se combinan). Está pendiente de incluir.
 - 1 $ de renta = 25 Atlas Bucks; una parcela = 100 AB = 4 $. *(Confirmado, hoy sin uso.)*
 
@@ -68,11 +67,11 @@ PWA (GitHub Pages) → proxy de Netlify (ruta `atlas-earth`) → Worker de Cloud
 index.html · manifest.webmanifest · sw.js · css/style.css
 icons/  icon.svg (original del icono) · icon-192/512.png · icon-maskable-512.png · apple-touch-icon.png
 js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
-     calc.js (cálculos) · format.js · rate-text.js · html.js · type-style.js (colores)
-     screens/ home.js · money.js · settings.js · login.js
+     calc.js (cálculos) · format.js · html.js · type-style.js (colores)
+     screens/ home.js · money.js · login.js
      ui/      hero.js (tarjeta verde) · tiles.js (cuadrícula con − y +)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
-         src/handlers/ index.js · getAll.js · saveState.js · saveRates.js
+         src/handlers/ index.js · getAll.js · saveState.js
 ```
 
 ## Datos (D1)
@@ -109,7 +108,6 @@ Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acci�
 |---|---|---|
 | `getAll` | — | `{ types: [{ id, name, rate, count }], account: { total_earned, balance, updated_at } }` |
 | `saveState` | `{ total_earned, balance, updated_at, counts?: { idTipo: entero } }` | `{ ok }` |
-| `saveRates` | `{ rates: { idTipo: $ por segundo } }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 

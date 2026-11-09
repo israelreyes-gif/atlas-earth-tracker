@@ -20,5 +20,4 @@ async function call(action, payload = {}) {
 export const api = {
   getAll: () => call('getAll'),
   saveState: (state) => call('saveState', state),
-  saveRates: (rates) => call('saveRates', { rates }),
 };
