@@ -1,10 +1,29 @@
 // Inicio: contador de ganancia diaria y próximo retiro.
 import { dayFractionElapsed, daysToReach, addDays, earnedToday, estimatedBalance, incomePerParcel, latestSnapshot } from '../calc.js';
 import { formatDay, formatDays, formatEuro, formatNumber, formatToday } from '../format.js';
+import { escapeHtml } from '../html.js';
 import { state } from '../store.js';
 import { emptyHtml } from './empty.js';
 
 const GEAR = '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>';
+
+// Desglose por tipo de parcela del último registro (solo si tiene cantidades por tipo).
+function breakdownHtml(snapshot) {
+  const counts = snapshot.counts;
+  if (!counts) return '';
+  const rows = state.settings.parcel_types
+    .filter((type) => (counts[type.id] ?? 0) > 0)
+    .map((type) => {
+      const amount = counts[type.id];
+      return `
+        <div class="record">
+          <span>${escapeHtml(type.name)}</span>
+          <span class="muted">${formatNumber(amount)} × ${formatEuro(type.income, 4)} = <strong>${formatEuro(amount * type.income)}</strong></span>
+        </div>`;
+    })
+    .join('');
+  return rows ? `<section class="card" aria-label="Tus parcelas"><span class="title">Tus parcelas</span>${rows}</section>` : '';
+}
 
 export function renderHome(container) {
   const snapshot = latestSnapshot(state.snapshots);
@@ -49,6 +68,8 @@ export function renderHome(container) {
       <div class="stat"><span class="value">${formatEuro(daily * 30)}</span><span class="label">Al mes</span></div>
       <div class="stat"><span class="value">${formatEuro(daily * 365, 0)}</span><span class="label">Al año</span></div>
     </div>
+
+    ${breakdownHtml(snapshot)}
 
     <section class="card" aria-label="Próximo retiro">
       <div class="row between">

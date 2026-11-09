@@ -2,28 +2,30 @@
 
 PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gano al día con mis parcelas, cómo he evolucionado en el último año, cuándo llegaré a un objetivo y si compensa comprar parcelas o esperar a retirar.
 
-> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · versión inicial.
+> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · tipos de parcela con + y −.
 
 ## Qué hace
 
 | Pantalla | Para qué sirve |
 |---|---|
-| **Inicio** | Contador de lo que ganas al día con las parcelas actuales, lo que llevas hoy (se mueve en directo), lo que ganas al mes y al año, y el próximo retiro. |
+| **Inicio** | Contador de lo que ganas al día con las parcelas actuales, lo que llevas hoy (se mueve en directo), lo que ganas al mes y al año, el desglose por tipo de parcela y el próximo retiro. |
 | **Evolución** | Gráfica de la ganancia diaria (3 meses, 6 meses o 1 año), estadísticas y lista de registros (se pueden borrar). |
 | **Objetivos** | Fecha estimada para cada meta: retirar el mínimo, juntar dinero, llegar a N parcelas o a X €/día. Ritmo de compra ajustable con un deslizador. |
-| **Compras** | Compara comprar parcelas ahora con esperar a retirar: en cuánto se amortiza, cuándo retiras en cada caso y qué sale mejor. |
-| **Ajustes** | Importe mínimo para retirar (por defecto 5 €) y cerrar sesión en el dispositivo. |
+| **Compras** | Compara comprar parcelas ahora con esperar a retirar: en cuánto se amortiza, cuándo retiras en cada caso y qué sale mejor. Se elige de qué tipo es la parcela que se compra. |
+| **Actualizar mis parcelas** | Formulario para apuntar un registro. Con tipos de parcela definidos: una fila por tipo con **−**, la cantidad (también se puede escribir) y **+**; el total de parcelas y la ganancia diaria se calculan solos. Sin tipos: parcelas y ganancia diaria a mano. |
+| **Ajustes** | Importe mínimo para retirar (por defecto 5 €), **tipos de parcela** (nombre + lo que da al día cada parcela) y cerrar sesión en el dispositivo. |
 
 ### No hay conexión con la cuenta de Atlas Earth
 
-Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no lee la cuenta: **los datos se apuntan a mano** con el botón *Actualizar mis parcelas* (parcelas, ganancia diaria y saldo, copiados de la app del juego). Cuantas más veces se apunte, mejor sale la evolución.
+Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no lee la cuenta: **los datos se apuntan a mano** con el botón *Actualizar mis parcelas* (cantidad de parcelas de cada tipo y saldo, copiados de la app del juego). Cuantas más veces se apunte, mejor sale la evolución.
 
 ### Supuestos de los cálculos
 
-- Ganancia por parcela = ganancia diaria ÷ parcelas del último registro.
+- **Tipos de parcela**: los define el usuario en *Ajustes* (nombre + € al día por parcela); la app no trae ninguno inventado. Ganancia diaria de un registro = suma de cantidad × ganancia de cada tipo. Cambiar la ganancia de un tipo **no modifica los registros antiguos** (guardan su total).
+- Ganancia media por parcela = ganancia diaria ÷ parcelas del último registro (se usa para objetivos de ganancia diaria).
 - El saldo mostrado es una **estimación**: saldo del último registro + ganancia diaria × tiempo transcurrido.
 - "Hoy llevas" = ganancia diaria × fracción del día transcurrida desde las 00:00 (estimación, no el dato real del juego).
-- En *Compras* el coste sale del saldo, y se asume que cada parcela nueva rinde lo mismo que la media actual.
+- En *Compras* el coste sale del saldo, y se elige el tipo de parcela que se compra (o la media actual).
 - Ritmo de compra por defecto = parcelas ganadas al mes en el último año (si hay menos de 2 registros o menos de ~1 semana entre ellos, 5 parcelas/mes).
 - Un mes = 30,44 días.
 
@@ -63,17 +65,20 @@ js/
   session.js                Clave de acceso guardada en el dispositivo
   calc.js                   Cálculos puros (días hasta un objetivo, compras, ritmo…)
   goal-info.js              Convierte un objetivo en título, fecha, progreso y detalle
+  parcel-types.js           Totales a partir de las cantidades por tipo de parcela
   chart.js                  Gráfica de línea en SVG
   format.js                 Formato de números y fechas en español
   html.js                   escapeHtml
   ui/nav.js                 Menú inferior
+  ui/stepper.js             Fila con − cantidad + para un tipo de parcela
+  ui/types-editor.js        Editor de tipos de parcela (Ajustes)
   screens/
     home.js evolution.js goals.js purchases.js update.js settings.js login.js empty.js
 worker/
   wrangler.jsonc            Configuración del Worker y enlace con D1 (binding DB)
   src/
     index.js                Entrada: valida clave y reparte la acción
-    auth.js json.js validate.js
+    auth.js json.js validate.js validateParcels.js
     handlers/               Una acción por fichero: getAll, addSnapshot, deleteSnapshot,
                             addGoal, deleteGoal, saveSettings (+ index.js con el mapa)
 ```
@@ -83,14 +88,20 @@ worker/
 Las tablas se crean a mano en la consola de D1 (no hay fichero de esquema en el repo). **Si cambia una tabla, se actualiza aquí y se avisa para ejecutar el cambio en la consola.** SQL con el que se crearon:
 
 ```sql
-CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, taken_at TEXT NOT NULL, parcels INTEGER NOT NULL, daily_income REAL NOT NULL, balance REAL NOT NULL);
+CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, taken_at TEXT NOT NULL, parcels INTEGER NOT NULL, daily_income REAL NOT NULL, balance REAL NOT NULL, counts TEXT);
 CREATE TABLE IF NOT EXISTS goals (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, target REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 ```
 
-- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` (€), `balance` (€). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
+Cambios posteriores a la creación (ejecutar una sola vez en la consola si la base ya existía):
+
+```sql
+ALTER TABLE snapshots ADD COLUMN counts TEXT;
+```
+
+- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` (€), `balance` (€), `counts` (JSON `{ idTipo: cantidad }`, vacío en registros antiguos). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
 - **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Retirar X €" no se guarda: sale de los ajustes.
-- **settings**: `key`, `value`. Ahora solo `withdraw_threshold` (por defecto 5).
+- **settings**: `key`, `value`. Claves: `withdraw_threshold` (por defecto 5) y `parcel_types` (JSON `[{ id, name, income }]`, con `income` = € al día de cada parcela de ese tipo; por defecto vacío).
 
 ## API del Worker
 
@@ -102,12 +113,12 @@ Siempre `POST` a la URL del Worker (a través del proxy) con cuerpo `text/plain`
 
 | Acción | Payload | Respuesta |
 |---|---|---|
-| `getAll` | — | `{ settings, snapshots, goals }` |
-| `addSnapshot` | `{ taken_at, parcels, daily_income, balance }` | `{ id }` |
+| `getAll` | — | `{ settings: { withdraw_threshold, parcel_types }, snapshots, goals }` |
+| `addSnapshot` | `{ taken_at, parcels, daily_income, balance, counts? }` | `{ id }` |
 | `deleteSnapshot` | `{ id }` | `{ ok }` |
 | `addGoal` | `{ type, target }` | `{ id }` |
 | `deleteGoal` | `{ id }` | `{ ok }` |
-| `saveSettings` | `{ withdraw_threshold }` | `{ ok }` |
+| `saveSettings` | `{ withdraw_threshold?, parcel_types? }` (uno o los dos) | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 
@@ -133,6 +144,8 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 - [x] Worker conectado a GitHub y desplegado
 - [x] Secreto `API_KEY` creado
 - [x] Ruta `atlas-earth` añadida al proxy (repo `israelreyes-gif/api-proxy`)
+- [ ] Columna `counts` añadida a `snapshots` (`ALTER TABLE`, ver [Datos](#datos-d1))
+- [ ] Tipos de parcela definidos en Ajustes
 - [ ] Primer registro guardado desde la app
 
 ## Reglas del proyecto
@@ -150,6 +163,7 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 9. **Cuentas gratuitas**: no usar nada que requiera pago.
 10. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
 11. Commits a `main` (despliegan solos). Mensajes claros en español.
+12. **Cambios en la base de datos**: dar al usuario el SQL, esperar su "listo" y **solo entonces** hacer push (el Worker se despliega solo y fallaría sin la columna). Actualizar la sección Datos del README.
 
 ## Pendiente / ideas
 

@@ -1,5 +1,5 @@
 // Validaciones sencillas. Lanzan un error con status 400.
-function badRequest(message) {
+export function badRequest(message) {
   const error = new Error(message);
   error.status = 400;
   return error;
