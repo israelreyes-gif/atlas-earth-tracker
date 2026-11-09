@@ -1,7 +1,7 @@
 // Evolución: gráfica de la ganancia diaria, estadísticas y registros.
 import { filterByMonths, purchasePace } from '../calc.js';
 import { lineChart } from '../chart.js';
-import { formatDay, formatEuro, formatNumber } from '../format.js';
+import { formatDay, formatDollar, formatNumber } from '../format.js';
 import { state, removeSnapshot } from '../store.js';
 import { emptyHtml } from './empty.js';
 
@@ -19,8 +19,8 @@ function statsHtml(list, now) {
   const pace = purchasePace(list, now);
   return `
     <div class="grid2">
-      <div class="stat"><span class="label">Al inicio</span><span class="value">${formatEuro(first.daily_income)}/día</span></div>
-      <div class="stat"><span class="label">Hoy</span><span class="value">${formatEuro(last.daily_income)}/día</span></div>
+      <div class="stat"><span class="label">Al inicio</span><span class="value">${formatDollar(first.daily_income)}/día</span></div>
+      <div class="stat"><span class="label">Hoy</span><span class="value">${formatDollar(last.daily_income)}/día</span></div>
       <div class="stat"><span class="label">Parcelas ganadas</span><span class="value">${gained > 0 ? '+' : ''}${formatNumber(gained)}</span></div>
       <div class="stat"><span class="label">Ritmo medio</span><span class="value">${formatNumber(pace, 1)} / mes</span></div>
     </div>`;
@@ -31,7 +31,7 @@ function recordsHtml(snapshots) {
     <div class="record">
       <div class="info">
         <strong>${formatDay(new Date(s.taken_at))} ${new Date(s.taken_at).getFullYear()}</strong>
-        <span class="muted">${formatNumber(s.parcels)} parcelas · ${formatEuro(s.daily_income)}/día · saldo ${formatEuro(s.balance)}</span>
+        <span class="muted">${formatNumber(s.parcels)} parcelas · ${formatDollar(s.daily_income)}/día · saldo ${formatDollar(s.balance)}</span>
       </div>
       <button class="link-btn" data-remove="${s.id}" aria-label="Borrar registro">Borrar</button>
     </div>`).join('');
@@ -51,7 +51,7 @@ export function renderEvolution(container) {
     const list = filterByMonths(state.snapshots, months, now);
     const points = list.map((s) => ({ t: new Date(s.taken_at).getTime(), v: s.daily_income }));
     const label = list.length
-      ? `Ganancia diaria de ${formatEuro(list[0].daily_income)} a ${formatEuro(list[list.length - 1].daily_income)}`
+      ? `Ganancia diaria de ${formatDollar(list[0].daily_income)} a ${formatDollar(list[list.length - 1].daily_income)}`
       : 'Sin registros';
 
     container.innerHTML = `
@@ -63,7 +63,7 @@ export function renderEvolution(container) {
         ${PERIODS.map((p) => `<button type="button" data-months="${p.months}" aria-pressed="${p.months === months}">${p.label}</button>`).join('')}
       </div>
       <section class="card">
-        <span class="title" style="font-size: 14px">€ al día</span>
+        <span class="title" style="font-size: 14px">$ al día</span>
         ${lineChart(points, label)}
       </section>
       ${statsHtml(list, now)}

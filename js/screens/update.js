@@ -19,11 +19,11 @@ export function renderUpdate(container) {
         <input id="parcels" inputmode="numeric" value="${escapeHtml(parcels)}" required>
       </div>
       <div class="field">
-        <label for="income">Ganancia diaria (€)</label>
+        <label for="income">Ganancia diaria ($)</label>
         <input id="income" inputmode="decimal" value="${escapeHtml(income)}" required>
       </div>
       <div class="field">
-        <label for="balance">Saldo actual (€)</label>
+        <label for="balance">Saldo actual ($)</label>
         <input id="balance" inputmode="decimal" value="${escapeHtml(balance)}" required>
       </div>
       <p class="error" id="message" role="alert"></p>

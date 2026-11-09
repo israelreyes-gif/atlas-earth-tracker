@@ -6,7 +6,7 @@ export async function getAll(_payload, env) {
   const goals = await env.DB.prepare('SELECT id, type, target FROM goals ORDER BY id ASC').all();
   const settingRows = await env.DB.prepare('SELECT key, value FROM settings').all();
 
-  const settings = { withdraw_threshold: 5 };
+  const settings = { withdraw_threshold: 5, ab_per_dollar: 25, parcel_ab: 100 };
   for (const row of settingRows.results) settings[row.key] = Number(row.value);
 
   return { settings, snapshots: snapshots.results, goals: goals.results };

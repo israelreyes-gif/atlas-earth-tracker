@@ -11,8 +11,8 @@ function numberFormat(decimals) {
   return formats[decimals];
 }
 
-export function formatEuro(value, decimals = 2) {
-  return `${numberFormat(decimals).format(value)} €`;
+export function formatDollar(value, decimals = 2) {
+  return `${numberFormat(decimals).format(value)} $`;
 }
 
 export function formatNumber(value, decimals = 0) {

@@ -1,6 +1,6 @@
-// Inicio: contador de ganancia diaria y próximo retiro.
+// Inicio: contador de ganancia diaria y próximo canjeo.
 import { dayFractionElapsed, daysToReach, addDays, earnedToday, estimatedBalance, incomePerParcel, latestSnapshot } from '../calc.js';
-import { formatDay, formatDays, formatEuro, formatNumber, formatToday } from '../format.js';
+import { formatDay, formatDays, formatDollar, formatNumber, formatToday } from '../format.js';
 import { state } from '../store.js';
 import { emptyHtml } from './empty.js';
 
@@ -32,10 +32,10 @@ export function renderHome(container) {
     <section class="hero" aria-label="Ganancia diaria">
       <span class="soft">Ganas al día</span>
       <div class="row baseline">
-        <span class="big">${formatEuro(daily)}</span>
+        <span class="big">${formatDollar(daily)}</span>
         <span class="unit">/día</span>
       </div>
-      <span class="soft">${formatNumber(snapshot.parcels)} parcelas · ${formatEuro(perParcel, 4)} por parcela</span>
+      <span class="soft">${formatNumber(snapshot.parcels)} parcelas · ${formatDollar(perParcel, 4)} por parcela</span>
       <div class="divider"></div>
       <div class="row between baseline">
         <span class="soft">Hoy llevas</span>
@@ -46,14 +46,14 @@ export function renderHome(container) {
 
     <div class="grid3">
       <div class="stat"><span class="value">${formatNumber(snapshot.parcels)}</span><span class="label">Parcelas</span></div>
-      <div class="stat"><span class="value">${formatEuro(daily * 30)}</span><span class="label">Al mes</span></div>
-      <div class="stat"><span class="value">${formatEuro(daily * 365, 0)}</span><span class="label">Al año</span></div>
+      <div class="stat"><span class="value">${formatDollar(daily * 30)}</span><span class="label">Al mes</span></div>
+      <div class="stat"><span class="value">${formatDollar(daily * 365, 0)}</span><span class="label">Al año</span></div>
     </div>
 
-    <section class="card" aria-label="Próximo retiro">
+    <a class="card card-link" href="#purchases" aria-label="Próximo canjeo: ver ingresos acumulados y opciones de cobro">
       <div class="row between">
-        <span class="title">Próximo retiro</span>
-        <span class="pill">Objetivo ${formatEuro(threshold, Number.isInteger(threshold) ? 0 : 2)}</span>
+        <span class="title">Próximo canjeo</span>
+        <span class="pill">Objetivo ${formatDollar(threshold, Number.isInteger(threshold) ? 0 : 2)}</span>
       </div>
       <div class="row between baseline">
         <span class="num" id="balance" style="font-size: 24px"></span>
@@ -61,8 +61,8 @@ export function renderHome(container) {
       </div>
       <div class="bar"><i id="balance-bar"></i></div>
       <span class="muted" id="eta"></span>
-      <span class="muted small">Saldo estimado desde tu última actualización (${formatDay(new Date(snapshot.taken_at))})</span>
-    </section>
+      <span class="muted small">Ingresos acumulados estimados desde tu última actualización (${formatDay(new Date(snapshot.taken_at))}) · Toca para cobrar o comprar</span>
+    </a>
 
     <a class="btn btn-dark" href="#update" style="margin-top: auto">Actualizar mis parcelas</a>`;
 
@@ -75,19 +75,19 @@ export function renderHome(container) {
 
   function tick() {
     const now = new Date();
-    earnedEl.textContent = formatEuro(earnedToday(snapshot, now), 4);
+    earnedEl.textContent = formatDollar(earnedToday(snapshot, now), 4);
     earnedBar.style.width = `${dayFractionElapsed(now) * 100}%`;
 
     const balance = estimatedBalance(snapshot, now);
-    balanceEl.textContent = formatEuro(balance);
+    balanceEl.textContent = formatDollar(balance);
     balanceBar.style.width = `${Math.min(1, balance / threshold) * 100}%`;
 
     const days = daysToReach(balance, threshold, daily);
     if (days === 0) {
-      missingEl.textContent = '¡Ya puedes retirar!';
-      etaEl.textContent = 'Has llegado al mínimo para retirar';
+      missingEl.textContent = '¡Ya puedes canjear!';
+      etaEl.textContent = 'Has llegado al mínimo para canjear';
     } else {
-      missingEl.textContent = `faltan ${formatEuro(threshold - balance)}`;
+      missingEl.textContent = `faltan ${formatDollar(threshold - balance)}`;
       etaEl.textContent = Number.isFinite(days)
         ? `A este ritmo llegas el ${formatDay(addDays(now, days))} (en ${formatDays(days)})`
         : 'Sin ganancias no se llega al mínimo';

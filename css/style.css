@@ -228,3 +228,29 @@ input[type="range"] { width: 100%; height: 44px; margin: 0; accent-color: var(--
 .record .info { display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
 
 .chart { display: block; width: 100%; }
+
+/* Cobrar y accesibilidad */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+.card-link { color: inherit; text-decoration: none; }
+.hero .small-big { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.status { font-size: 16px; font-weight: 700; }
+.status.ok { color: var(--green); }
+.stepper { display: flex; gap: 10px; align-items: center; }
+.stepper input { text-align: center; flex: 1; min-width: 0; }
+.step {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border: 1px solid #C9D4CD;
+  border-radius: 14px;
+  background: #FFFFFF;
+  color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.step:active { background: var(--green-soft); }

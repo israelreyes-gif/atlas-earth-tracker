@@ -1,18 +1,26 @@
 # Atlas Tracker
 
-PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gano al día con mis parcelas, cómo he evolucionado en el último año, cuándo llegaré a un objetivo y si compensa comprar parcelas o esperar a retirar.
+PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gano al día con mis parcelas, cómo he evolucionado en el último año, cuándo llegaré a un objetivo y si compensa comprar parcelas o esperar a canjear.
 
-> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · versión inicial.
+> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · importes en dólares y pantalla *Cobrar*.
 
 ## Qué hace
 
 | Pantalla | Para qué sirve |
 |---|---|
-| **Inicio** | Contador de lo que ganas al día con las parcelas actuales, lo que llevas hoy (se mueve en directo), lo que ganas al mes y al año, y el próximo retiro. |
+| **Inicio** | Contador de lo que ganas al día con las parcelas actuales, lo que llevas hoy (se mueve en directo), lo que ganas al mes y al año, y el próximo canjeo (tocándolo se abre *Cobrar*). |
 | **Evolución** | Gráfica de la ganancia diaria (3 meses, 6 meses o 1 año), estadísticas y lista de registros (se pueden borrar). |
-| **Objetivos** | Fecha estimada para cada meta: retirar el mínimo, juntar dinero, llegar a N parcelas o a X €/día. Ritmo de compra ajustable con un deslizador. |
-| **Compras** | Compara comprar parcelas ahora con esperar a retirar: en cuánto se amortiza, cuándo retiras en cada caso y qué sale mejor. |
-| **Ajustes** | Importe mínimo para retirar (por defecto 5 €) y cerrar sesión en el dispositivo. |
+| **Objetivos** | Fecha estimada para cada meta: canjear el mínimo, juntar dinero, llegar a N parcelas o a X $/día. Ritmo de compra ajustable con un deslizador. |
+| **Cobrar** | Réplica adaptada de la pantalla *Ingresos acumulados* del juego: ingresos acumulados en directo con barra hacia el mínimo, cuándo se puede canjear por dinero real y, para pasarlos a Atlas Bucks, un selector de parcelas con botones grandes + y − (y "todas las que me llegan") que compara comprar ahora con esperar a canjear. |
+| **Ajustes** | Valores del juego editables (mínimo para canjear: 5 $; Atlas Bucks por 1 $: 25; Atlas Bucks por parcela: 100) y cerrar sesión en el dispositivo. |
+
+### Reglas del juego usadas (confirmadas por el usuario)
+
+- **Moneda: dólares ($)**, tal como los muestra el juego. Toda la app muestra $.
+- Los ingresos acumulados se pueden **canjear por dinero real a partir de 5 $** (pantalla *Ingresos acumulados* del juego).
+- **1 $ de renta = 25 Atlas Bucks (AB)**; **una parcela = 100 AB = 4 $** de renta.
+- Estos tres valores viven en Ajustes (tabla `settings`), no en el código.
+- Aún **sin confirmar** y por eso no usados: tipos de parcela con sus ganancias, boosts x20/x50 y pasaporte, insignias.
 
 ### No hay conexión con la cuenta de Atlas Earth
 
@@ -23,7 +31,7 @@ Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no l
 - Ganancia por parcela = ganancia diaria ÷ parcelas del último registro.
 - El saldo mostrado es una **estimación**: saldo del último registro + ganancia diaria × tiempo transcurrido.
 - "Hoy llevas" = ganancia diaria × fracción del día transcurrida desde las 00:00 (estimación, no el dato real del juego).
-- En *Compras* el coste sale del saldo, y se asume que cada parcela nueva rinde lo mismo que la media actual.
+- En *Cobrar* el coste (parcelas × 4 $) sale de los ingresos acumulados, y se asume que cada parcela nueva rinde lo mismo que la media actual.
 - Ritmo de compra por defecto = parcelas ganadas al mes en el último año (si hay menos de 2 registros o menos de ~1 semana entre ellos, 5 parcelas/mes).
 - Un mes = 30,44 días.
 
@@ -88,9 +96,9 @@ CREATE TABLE IF NOT EXISTS goals (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEX
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 ```
 
-- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` (€), `balance` (€). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
-- **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Retirar X €" no se guarda: sale de los ajustes.
-- **settings**: `key`, `value`. Ahora solo `withdraw_threshold` (por defecto 5).
+- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` ($), `balance` ($, ingresos acumulados). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
+- **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Canjear X $" no se guarda: sale de los ajustes.
+- **settings**: `key`, `value`. `withdraw_threshold` (5), `ab_per_dollar` (25) y `parcel_ab` (100). Si falta alguno, la app usa esos valores por defecto.
 
 ## API del Worker
 
@@ -107,7 +115,7 @@ Siempre `POST` a la URL del Worker (a través del proxy) con cuerpo `text/plain`
 | `deleteSnapshot` | `{ id }` | `{ ok }` |
 | `addGoal` | `{ type, target }` | `{ id }` |
 | `deleteGoal` | `{ id }` | `{ ok }` |
-| `saveSettings` | `{ withdraw_threshold }` | `{ ok }` |
+| `saveSettings` | uno o varios de `{ withdraw_threshold, ab_per_dollar, parcel_ab }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 
@@ -146,12 +154,13 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 5. **Antes de tocar varios ficheros, explicar en qué consiste el cambio.** Si se da código al usuario: ruta del fichero, si es nuevo o modificado, y el fichero **completo** (nunca fragmentos), para copiar y pegar.
 6. **El usuario no puede instalar Node.js**: nada de Wrangler/CLI en su equipo. Todo se despliega con los paneles web y la conexión GitHub ↔ Cloudflare.
 7. **Proxy siempre entre la PWA y el Worker** (Netlify, ruta `atlas-earth`). El Worker no añade CORS.
-8. **No inventar datos del juego.** Atlas Earth no tiene API pública: los datos los apunta el usuario. Lo que no se sepa (costes, reglas de retirada…) se pregunta o se deja configurable.
+8. **No inventar datos del juego.** Atlas Earth no tiene API pública: los datos los apunta el usuario. Lo que no se sepa (costes, reglas del juego…) se pregunta o se deja configurable.
 9. **Cuentas gratuitas**: no usar nada que requiera pago.
 10. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
-11. Commits a `main` (despliegan solos). Mensajes claros en español.
+11. **Cambios que dependan de la base de datos** (columnas o tablas nuevas): dar primero el SQL, esperar a que el usuario diga "listo" y solo entonces subir el código.
+12. Commits a `main` (despliegan solos). Mensajes claros en español.
 
 ## Pendiente / ideas
 
 - Si Atlas Earth cambia o se descubre un dato fiable, revisar los supuestos de cálculo de arriba.
-- Posibles mejoras: exportar/importar registros, avisos cuando se llegue al mínimo para retirar, varios ritmos de compra por escenario.
+- Posibles mejoras: exportar/importar registros, avisos cuando se llegue al mínimo para canjear, varios ritmos de compra por escenario.

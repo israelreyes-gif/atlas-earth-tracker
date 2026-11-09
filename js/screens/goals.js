@@ -1,15 +1,15 @@
 // Objetivos: fecha estimada para cada meta según el ritmo de compra.
 import { estimatedBalance, filterByMonths, incomePerParcel, latestSnapshot, purchasePace } from '../calc.js';
-import { buildGoalInfo, euroTarget } from '../goal-info.js';
+import { buildGoalInfo, dollarTarget } from '../goal-info.js';
 import { escapeHtml } from '../html.js';
 import { formatNumber, parseNumber } from '../format.js';
 import { addGoal, removeGoal, state } from '../store.js';
 import { emptyHtml } from './empty.js';
 
 const TYPE_LABELS = {
-  money: 'Juntar dinero (€)',
+  money: 'Juntar dinero ($)',
   parcels: 'Número de parcelas',
-  income: 'Ganancia diaria (€)',
+  income: 'Ganancia diaria ($)',
 };
 
 function goalCard(goal, info) {
@@ -48,7 +48,7 @@ export function renderGoals(container) {
       pace,
       now,
     };
-    const withdraw = { id: null, type: 'money', target: threshold, title: `Retirar ${euroTarget(threshold)}` };
+    const withdraw = { id: null, type: 'money', target: threshold, title: `Canjear ${dollarTarget(threshold)}` };
     return [withdraw, ...state.goals]
       .map((goal) => goalCard(goal, buildGoalInfo(goal, context)))
       .join('');

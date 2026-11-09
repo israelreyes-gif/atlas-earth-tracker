@@ -3,7 +3,7 @@ const ITEMS = [
   { route: 'home', label: 'Inicio', icon: '<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>' },
   { route: 'evolution', label: 'Evolución', icon: '<path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/>' },
   { route: 'goals', label: 'Objetivos', icon: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>' },
-  { route: 'purchases', label: 'Compras', icon: '<circle cx="9" cy="9" r="6"/><path d="M15.5 8.5A6 6 0 1 1 8.5 15.5"/>' },
+  { route: 'purchases', label: 'Cobrar', icon: '<circle cx="9" cy="9" r="6"/><path d="M15.5 8.5A6 6 0 1 1 8.5 15.5"/>' },
 ];
 
 export function renderNav(nav, activeRoute) {

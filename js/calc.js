@@ -1,4 +1,4 @@
-// Cálculos puros (sin DOM ni red). Todos los importes en €.
+// Cálculos puros (sin DOM ni red). Todos los importes en dólares ($).
 export const DAY_MS = 86400000;
 export const MONTH_DAYS = 30.44;
 
@@ -70,7 +70,7 @@ export function purchasePace(snapshots) {
   return Math.max(0, (last.parcels - first.parcels) / months);
 }
 
-// Compara comprar ahora (el coste sale del saldo) con esperar a retirar.
+// Compara comprar ahora (el coste sale del saldo) con esperar a canjear.
 export function analyzePurchase({ cost, parcels, perParcel, balance, dailyIncome, threshold }) {
   const extraDaily = parcels * perParcel;
   const newDaily = dailyIncome + extraDaily;
