@@ -4,14 +4,14 @@ import { api } from './api.js';
 const CACHE_KEY = 'atlas-tracker-cache-v1';
 
 export const state = {
-  settings: { withdraw_threshold: 5, parcel_types: [] },
+  settings: { withdraw_threshold: 5 },
   snapshots: [],
   goals: [],
   offline: false,
 };
 
 function apply(data) {
-  state.settings = { withdraw_threshold: 5, parcel_types: [], ...data.settings };
+  state.settings = { withdraw_threshold: 5, ...data.settings };
   state.snapshots = data.snapshots;
   state.goals = data.goals;
 }
