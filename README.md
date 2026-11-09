@@ -130,8 +130,8 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 - [x] GitHub Pages activado
 - [x] D1 creada y `database_id` puesto en `worker/wrangler.jsonc`
 - [x] Tablas creadas en la consola de D1
-- [ ] Worker conectado a GitHub y desplegado
-- [ ] Secreto `API_KEY` creado
+- [x] Worker conectado a GitHub y desplegado
+- [x] Secreto `API_KEY` creado
 - [ ] Ruta `atlas-earth` añadida al proxy
 - [ ] Primer registro guardado desde la app
 
