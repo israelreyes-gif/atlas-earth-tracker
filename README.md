@@ -42,6 +42,7 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 - Tipos de parcela: **Común, Raro, Épico y Legendario**. Cuenta del 2026-11-09: 28, 15, 9 y 4 (56 en total).
 - El juego muestra lo que da cada parcela **por segundo**; la app lo pasa a día (× 86.400) y a mes (× 30,44).
 - Tarifas base por segundo cargadas al principio (de la captura de rarezas; revisables en Ajustes): Común 0,0000000011 · Raro 0,0000000016 · Épico 0,0000000022 · Legendario 0,0000000044.
+- **Boost x20 confirmado** (2026-11-09): con él activo, el saldo subió unos 0,17 $/día frente a los 0,008 $/día del cálculo base (≈ x21, es decir x20 más el +5 % de insignias, a falta de confirmar cómo se combinan). Está pendiente de incluir.
 - 1 $ de renta = 25 Atlas Bucks; una parcela = 100 AB = 4 $. *(Confirmado, hoy sin uso.)*
 
 ## Arquitectura
