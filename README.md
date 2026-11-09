@@ -1,1 +1,151 @@
-# atlas-earth-tracker
+# Atlas Tracker
+
+PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gano al día con mis parcelas, cómo he evolucionado en el último año, cuándo llegaré a un objetivo y si compensa comprar parcelas o esperar a retirar.
+
+> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · versión inicial.
+
+## Qué hace
+
+| Pantalla | Para qué sirve |
+|---|---|
+| **Inicio** | Contador de lo que ganas al día con las parcelas actuales, lo que llevas hoy (se mueve en directo), lo que ganas al mes y al año, y el próximo retiro. |
+| **Evolución** | Gráfica de la ganancia diaria (3 meses, 6 meses o 1 año), estadísticas y lista de registros (se pueden borrar). |
+| **Objetivos** | Fecha estimada para cada meta: retirar el mínimo, juntar dinero, llegar a N parcelas o a X €/día. Ritmo de compra ajustable con un deslizador. |
+| **Compras** | Compara comprar parcelas ahora con esperar a retirar: en cuánto se amortiza, cuándo retiras en cada caso y qué sale mejor. |
+| **Ajustes** | Importe mínimo para retirar (por defecto 5 €) y cerrar sesión en el dispositivo. |
+
+### No hay conexión con la cuenta de Atlas Earth
+
+Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no lee la cuenta: **los datos se apuntan a mano** con el botón *Actualizar mis parcelas* (parcelas, ganancia diaria y saldo, copiados de la app del juego). Cuantas más veces se apunte, mejor sale la evolución.
+
+### Supuestos de los cálculos
+
+- Ganancia por parcela = ganancia diaria ÷ parcelas del último registro.
+- El saldo mostrado es una **estimación**: saldo del último registro + ganancia diaria × tiempo transcurrido.
+- "Hoy llevas" = ganancia diaria × fracción del día transcurrida desde las 00:00 (estimación, no el dato real del juego).
+- En *Compras* el coste sale del saldo, y se asume que cada parcela nueva rinde lo mismo que la media actual.
+- Ritmo de compra por defecto = parcelas ganadas al mes en el último año (si hay menos de 2 registros o menos de ~1 semana entre ellos, 5 parcelas/mes).
+- Un mes = 30,44 días.
+
+## Arquitectura
+
+```
+Móvil (PWA en GitHub Pages)
+        │  POST (texto plano) con {key, action, payload}
+        ▼
+Proxy en Netlify  ── https://israelreyes-proxy.netlify.app/atlas-earth
+        │  evita los bloqueos de LaLiga y añade el CORS
+        ▼
+Worker de Cloudflare  ── código en GitHub (carpeta worker/), desplegado desde GitHub
+        │
+        ▼
+Base de datos D1 (Cloudflare)
+```
+
+- Todas las cuentas son gratuitas (GitHub, Cloudflare, Netlify).
+- **El proxy va siempre entre la PWA y el Worker.** La PWA nunca llama directamente a `workers.dev`.
+- La API es un único endpoint que recibe siempre `POST` con cuerpo `text/plain` (JSON como texto). Así el navegador no hace *preflight* de CORS y el proxy no necesita permitir cabeceras especiales. **El Worker no añade cabeceras CORS** (las pone el proxy; duplicarlas rompe las peticiones).
+- Acceso protegido con una clave (`API_KEY`, secreto del Worker). La app la pide la primera vez y la guarda en el dispositivo.
+
+## Estructura del repositorio
+
+```
+index.html                  Página única
+manifest.webmanifest        Datos de la PWA (nombre, iconos, colores)
+sw.js                       Service worker (red primero, copia local si no hay conexión)
+css/style.css               Estilos
+icons/                      Iconos PNG 192, 512 y 180 (iOS)
+js/
+  main.js                   Arranque, clave, carga de datos y rutas por #hash
+  config.js                 API_URL (ruta en el proxy de Netlify)
+  api.js                    Llamadas a la API
+  store.js                  Estado de la app + copia local para ir sin conexión
+  session.js                Clave de acceso guardada en el dispositivo
+  calc.js                   Cálculos puros (días hasta un objetivo, compras, ritmo…)
+  goal-info.js              Convierte un objetivo en título, fecha, progreso y detalle
+  chart.js                  Gráfica de línea en SVG
+  format.js                 Formato de números y fechas en español
+  html.js                   escapeHtml
+  ui/nav.js                 Menú inferior
+  screens/
+    home.js evolution.js goals.js purchases.js update.js settings.js login.js empty.js
+worker/
+  wrangler.jsonc            Configuración del Worker y enlace con D1 (binding DB)
+  schema.sql                Tablas de D1
+  src/
+    index.js                Entrada: valida clave y reparte la acción
+    auth.js json.js validate.js
+    handlers/               Una acción por fichero: getAll, addSnapshot, deleteSnapshot,
+                            addGoal, deleteGoal, saveSettings (+ index.js con el mapa)
+```
+
+## Datos (D1)
+
+Esquema en `worker/schema.sql`.
+
+- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` (€), `balance` (€). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
+- **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Retirar X €" no se guarda: sale de los ajustes.
+- **settings**: `key`, `value`. Ahora solo `withdraw_threshold` (por defecto 5).
+
+## API del Worker
+
+Siempre `POST` a la URL del Worker (a través del proxy) con cuerpo `text/plain`:
+
+```json
+{ "key": "<API_KEY>", "action": "<acción>", "payload": { } }
+```
+
+| Acción | Payload | Respuesta |
+|---|---|---|
+| `getAll` | — | `{ settings, snapshots, goals }` |
+| `addSnapshot` | `{ taken_at, parcels, daily_income, balance }` | `{ id }` |
+| `deleteSnapshot` | `{ id }` | `{ ok }` |
+| `addGoal` | `{ type, target }` | `{ id }` |
+| `deleteGoal` | `{ id }` | `{ ok }` |
+| `saveSettings` | `{ withdraw_threshold }` | `{ ok }` |
+
+Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
+
+## Despliegue (primera vez)
+
+Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
+
+1. **Repositorio** `israelreyes-gif/atlas-earth-tracker` (público) — ✅ hecho.
+2. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / `(root)`*. La app queda en `https://israelreyes-gif.github.io/atlas-earth-tracker/`.
+3. **D1**: en Cloudflare, *Storage & databases → D1 → Create database* con el nombre `atlas-earth-tracker`. Copiar su *Database ID*, pegarlo en `worker/wrangler.jsonc` (campo `database_id`) y, en la pestaña *Console* de la base de datos, ejecutar el contenido de `worker/schema.sql`.
+4. **Worker desde GitHub**: *Workers & Pages → Create → Import a repository* → elegir este repo. *Root directory*: `worker`. Cada commit en `main` despliega solo.
+5. **Secreto**: en el Worker, *Settings → Variables and Secrets → Add* → tipo *Secret*, nombre `API_KEY`, valor = la clave que se vaya a escribir en la app.
+6. **Proxy de Netlify**: en el repo del proxy, fichero `netlify/edge-functions/proxy.ts`, añadir al mapa `RUTAS` la línea `'atlas-earth': '<URL del Worker>'` y hacer commit en `main`.
+7. **Probar**: abrir la app, escribir la clave, pulsar *Actualizar mis parcelas* y guardar el primer registro.
+
+### Estado del despliegue
+
+- [x] Repositorio creado
+- [ ] GitHub Pages activado
+- [ ] D1 creada y `database_id` puesto en `worker/wrangler.jsonc`
+- [ ] Tablas creadas (`schema.sql`)
+- [ ] Worker conectado a GitHub y desplegado
+- [ ] Secreto `API_KEY` creado
+- [ ] Ruta `atlas-earth` añadida al proxy
+- [ ] Primer registro guardado desde la app
+
+## Reglas del proyecto
+
+Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
+
+1. **Mantener este README completamente actualizado** en el mismo cambio que modifique el código: estructura, datos, API, despliegue y estado.
+2. **Responder en español.**
+3. **Guías paso a paso, un paso cada vez**; se avanza cuando el usuario dice "listo". Preguntas de una en una.
+4. **Código en ficheros muy pequeños**, cada uno con una función concreta, sin mezclar responsabilidades.
+5. **Antes de tocar varios ficheros, explicar en qué consiste el cambio.** Si se da código al usuario: ruta del fichero, si es nuevo o modificado, y el fichero **completo** (nunca fragmentos), para copiar y pegar.
+6. **El usuario no puede instalar Node.js**: nada de Wrangler/CLI en su equipo. Todo se despliega con los paneles web y la conexión GitHub ↔ Cloudflare.
+7. **Proxy siempre entre la PWA y el Worker** (Netlify, ruta `atlas-earth`). El Worker no añade CORS.
+8. **No inventar datos del juego.** Atlas Earth no tiene API pública: los datos los apunta el usuario. Lo que no se sepa (costes, reglas de retirada…) se pregunta o se deja configurable.
+9. **Cuentas gratuitas**: no usar nada que requiera pago.
+10. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
+11. Commits a `main` (despliegan solos). Mensajes claros en español.
+
+## Pendiente / ideas
+
+- Si Atlas Earth cambia o se descubre un dato fiable, revisar los supuestos de cálculo de arriba.
+- Posibles mejoras: exportar/importar registros, avisos cuando se llegue al mínimo para retirar, varios ritmos de compra por escenario.

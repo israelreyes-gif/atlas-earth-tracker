@@ -1,0 +1,12 @@
+{
+  "name": "atlas-earth-tracker",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "atlas-earth-tracker",
+      "database_id": "PON_AQUI_EL_ID_DE_LA_BASE_D1"
+    }
+  ]
+}
