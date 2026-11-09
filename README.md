@@ -23,6 +23,10 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 | **Corregir el dinero** (`#money`) | Para volver a apuntar las dos cifras de dinero con las que muestra el juego. |
 | **Ajustes** (`#settings`) | Lo que da por segundo cada tipo de parcela (como en el juego) y cerrar sesión. |
 
+### Instalar como app (PWA)
+
+En Safari (iPhone): abrir la URL → botón *Compartir* → *Añadir a pantalla de inicio*. Se instala con el nombre **Atlas Tracker** y el icono elegido (monograma A con flecha dorada, creado para esta app; el icono es propio, no copia el del juego). Si se cambia el icono, hay que borrar la app de la pantalla de inicio y volver a añadirla.
+
 ### Cómo funciona el contador
 
 - Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.
@@ -57,7 +61,8 @@ PWA (GitHub Pages) → proxy de Netlify (ruta `atlas-earth`) → Worker de Cloud
 ### Estructura
 
 ```
-index.html · manifest.webmanifest · sw.js · icons/ · css/style.css
+index.html · manifest.webmanifest · sw.js · css/style.css
+icons/  icon.svg (original del icono) · icon-192/512.png · icon-maskable-512.png · apple-touch-icon.png
 js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
      calc.js (cálculos) · format.js · rate-text.js · html.js · type-style.js (colores)
      screens/ home.js · money.js · settings.js · login.js
