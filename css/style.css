@@ -296,3 +296,11 @@ h2 { margin: 0; font-size: 16px; font-weight: 700; }
 .tile-btn:active { background: var(--green-soft); }
 a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
 [hidden] { display: none !important; }
+
+/* Insignias */
+.badges { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+.badges-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.badges-controls { display: flex; align-items: center; gap: 8px; }
+.badges-controls .tile-btn { flex: none; width: 48px; }
+.badges-count { min-width: 44px; text-align: center; font-size: 24px; }
+.badges .title { font-size: 16px; font-weight: 600; }

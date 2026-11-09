@@ -1,6 +1,6 @@
 import { badRequest, requireDate, requireNumber } from '../validate.js';
 
-// Guarda las cifras de dinero en un instante (updated_at) y, si se envían, las parcelas por tipo.
+// Guarda las cifras de dinero en un instante (updated_at) y, si se envían, las insignias y las parcelas por tipo.
 // Las dos cosas van juntas porque la app calcula el dinero con el ritmo que dan esas parcelas.
 export async function saveState(payload, env) {
   const totalEarned = requireNumber(payload.total_earned, 'total_earned');
@@ -11,6 +11,12 @@ export async function saveState(payload, env) {
     env.DB.prepare('UPDATE account SET total_earned = ?, balance = ?, updated_at = ? WHERE id = 1')
       .bind(totalEarned, balance, updatedAt),
   ];
+
+  if (payload.badges !== undefined) {
+    const badges = requireNumber(payload.badges, 'badges', { integer: true });
+    if (badges > 9999) throw badRequest('badges no puede ser mayor que 9999');
+    statements.push(env.DB.prepare('UPDATE account SET badges = ? WHERE id = 1').bind(badges));
+  }
 
   if (payload.counts !== undefined) {
     if (typeof payload.counts !== 'object' || payload.counts === null || Array.isArray(payload.counts)) {

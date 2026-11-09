@@ -1,10 +1,10 @@
 // Corregir las dos cifras de dinero con las que muestra el juego.
 import { estimate } from '../calc.js';
 import { parseNumber, toInputValue } from '../format.js';
-import { persist, state } from '../store.js';
+import { currentMultiplier, persist, state } from '../store.js';
 
 export function renderMoney(container) {
-  const now = estimate(state.account, state.types, new Date());
+  const now = estimate(state.account, state.types, currentMultiplier(), new Date());
 
   container.innerHTML = `
     <h1>Corregir el dinero</h1>
@@ -43,7 +43,7 @@ export function renderMoney(container) {
 
     const button = form.querySelector('button[type="submit"]');
     button.disabled = true;
-    state.account = { total_earned: total, balance, updated_at: new Date().toISOString() };
+    state.account = { ...state.account, total_earned: total, balance, updated_at: new Date().toISOString() };
     try {
       await persist();
       location.hash = '#home';

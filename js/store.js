@@ -1,16 +1,19 @@
 // Estado de la app: lo último que devolvió la API (con copia local para ir sin conexión).
 import { api } from './api.js';
+import { multiplierFor } from './calc.js';
 
 const CACHE_KEY = 'atlas-tracker-cache-v2';
 
 export const state = {
   types: [],
+  levels: [],
   account: null,
   offline: false,
 };
 
 function apply(data) {
   state.types = data.types;
+  state.levels = data.passport_levels;
   state.account = data.account;
 }
 
@@ -54,8 +57,12 @@ export async function persist(extra = {}) {
     counts,
     total_earned: account.total_earned,
     balance: account.balance,
+    badges: account.badges,
     updated_at: account.updated_at,
     ...extra,
   });
-  saveCache({ types, account });
+  saveCache({ types, account, passport_levels: state.levels });
 }
+
+// Multiplicador actual de la ganancia (insignias del pasaporte).
+export const currentMultiplier = () => multiplierFor(state.account, state.levels);
