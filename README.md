@@ -119,6 +119,7 @@ Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
 2. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / `(root)`*. La app queda en `https://israelreyes-gif.github.io/atlas-earth-tracker/`.
 3. **D1**: en Cloudflare, *Storage & databases → D1 → Create database* con el nombre `atlas-earth-tracker`. Copiar su *Database ID*, pegarlo en `worker/wrangler.jsonc` (campo `database_id`) y, en la pestaña *Console* de la base de datos, ejecutar el SQL de la sección [Datos (D1)](#datos-d1).
 4. **Worker desde GitHub**: *Workers & Pages → Create → Import a repository* → elegir este repo. *Root directory*: `worker`. Cada commit en `main` despliega solo.
+   - URL del Worker: `https://atlas-earth-tracker.israel-reyes.workers.dev`. La dirección `workers.dev` debe estar activada (en `wrangler.jsonc`: `workers_dev: true`; en el panel, *Settings → Domains & Routes*, interruptor *Production*).
 5. **Secreto**: en el Worker, *Settings → Variables and Secrets → Add* → tipo *Secret*, nombre `API_KEY`, valor = la clave que se vaya a escribir en la app.
 6. **Proxy de Netlify**: en el repo del proxy, fichero `netlify/edge-functions/proxy.ts`, añadir al mapa `RUTAS` la línea `'atlas-earth': '<URL del Worker>'` y hacer commit en `main`.
 7. **Probar**: abrir la app, escribir la clave, pulsar *Actualizar mis parcelas* y guardar el primer registro.
