@@ -1,151 +1,20 @@
 # Atlas Tracker
 
-PWA personal para seguir mi cuenta del juego móvil **Atlas Earth**: cuánto gano al día con mis parcelas, cómo he evolucionado en el último año, cuándo llegaré a un objetivo y si compensa comprar parcelas o esperar a canjear.
+Repositorio vaciado el 2026-11-09 a petición del usuario: no queda código. Se conserva solo este README con lo que ya está decidido, para empezar de nuevo.
 
-> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · importes en dólares y pantalla *Cobrar*.
+## Datos del juego confirmados por el usuario
 
-## Qué hace
+- Moneda: dólares ($).
+- Los ingresos acumulados se pueden canjear por dinero real a partir de **5 $**.
+- **1 $ de renta = 25 Atlas Bucks (AB)**; **una parcela = 100 AB = 4 $**.
+- Hay parcelas de distintos tipos que dan distinta ganancia (se muestra por segundo en el juego).
+- Existen dos boosts (x20 y x50) y un pasaporte con niveles: cómo se aplican **no está confirmado**.
 
-| Pantalla | Para qué sirve |
-|---|---|
-| **Inicio** | Contador de lo que ganas al día con las parcelas actuales, lo que llevas hoy (se mueve en directo), lo que ganas al mes y al año, y el próximo canjeo (tocándolo se abre *Cobrar*). |
-| **Evolución** | Gráfica de la ganancia diaria (3 meses, 6 meses o 1 año), estadísticas y lista de registros (se pueden borrar). |
-| **Objetivos** | Fecha estimada para cada meta: canjear el mínimo, juntar dinero, llegar a N parcelas o a X $/día. Ritmo de compra ajustable con un deslizador. |
-| **Cobrar** | Réplica adaptada de la pantalla *Ingresos acumulados* del juego: ingresos acumulados en directo con barra hacia el mínimo, cuándo se puede canjear por dinero real y, para pasarlos a Atlas Bucks, un selector de parcelas con botones grandes + y − (y "todas las que me llegan") que compara comprar ahora con esperar a canjear. |
-| **Ajustes** | Tipos de parcela (nombre y $ por segundo como los muestra el juego), multiplicador de boosts/pasaporte, valores del juego editables (mínimo para canjear: 5 $; Atlas Bucks por 1 $: 25; Atlas Bucks por parcela: 100) y cerrar sesión en el dispositivo. |
+## Infraestructura que ya existe
 
-### Reglas del juego usadas (confirmadas por el usuario)
-
-- **Moneda: dólares ($)**, tal como los muestra el juego. Toda la app muestra $.
-- Los ingresos acumulados se pueden **canjear por dinero real a partir de 5 $** (pantalla *Ingresos acumulados* del juego).
-- **1 $ de renta = 25 Atlas Bucks (AB)**; **una parcela = 100 AB = 4 $** de renta.
-- Estos tres valores viven en Ajustes (tabla `settings`), no en el código.
-- **Tipos de parcela**: los define el usuario en Ajustes (nombre + $ por segundo, tal como lo ve en el juego). La app multiplica por 86.400 para pasarlo a $ al día y por el *multiplicador* (por defecto 1).
-- Al guardar un registro, la ganancia diaria se calcula con los tipos pero **se puede corregir a mano** con la cifra real del juego.
-- Aún **sin confirmar** y por eso no automatizados: cómo se aplican los boosts x20/x50 y el pasaporte (de ahí el multiplicador manual) e insignias.
-
-### No hay conexión con la cuenta de Atlas Earth
-
-Atlas Earth **no tiene API pública** (se buscó y no se encontró). La app no lee la cuenta: **los datos se apuntan a mano** con el botón *Actualizar mis parcelas* (parcelas, ganancia diaria y saldo, copiados de la app del juego). Con tipos de parcela definidos, se apunta cuántas hay de cada tipo con **+ y −**. Cuantas más veces se apunte, mejor sale la evolución.
-
-### Supuestos de los cálculos
-
-- Ganancia por parcela = ganancia diaria ÷ parcelas del último registro.
-- El saldo mostrado es una **estimación**: saldo del último registro + ganancia diaria × tiempo transcurrido.
-- "Hoy llevas" = ganancia diaria × fracción del día transcurrida desde las 00:00 (estimación, no el dato real del juego).
-- En *Cobrar* el coste (parcelas × 4 $) sale de los ingresos acumulados, y se asume que cada parcela nueva rinde lo mismo que la media actual.
-- Ritmo de compra por defecto = parcelas ganadas al mes en el último año (si hay menos de 2 registros o menos de ~1 semana entre ellos, 5 parcelas/mes).
-- Un mes = 30,44 días.
-
-## Arquitectura
-
-```
-Móvil (PWA en GitHub Pages)
-        │  POST (texto plano) con {key, action, payload}
-        ▼
-Proxy en Netlify  ── https://israelreyes-proxy.netlify.app/atlas-earth
-        │  evita los bloqueos de LaLiga y añade el CORS
-        ▼
-Worker de Cloudflare  ── código en GitHub (carpeta worker/), desplegado desde GitHub
-        │
-        ▼
-Base de datos D1 (Cloudflare)
-```
-
-- Todas las cuentas son gratuitas (GitHub, Cloudflare, Netlify).
-- **El proxy va siempre entre la PWA y el Worker.** La PWA nunca llama directamente a `workers.dev`.
-- La API es un único endpoint que recibe siempre `POST` con cuerpo `text/plain` (JSON como texto). Así el navegador no hace *preflight* de CORS y el proxy no necesita permitir cabeceras especiales. **El Worker no añade cabeceras CORS** (las pone el proxy; duplicarlas rompe las peticiones).
-- Acceso protegido con una clave (`API_KEY`, secreto del Worker). La app la pide la primera vez y la guarda en el dispositivo.
-
-## Estructura del repositorio
-
-```
-index.html                  Página única
-manifest.webmanifest        Datos de la PWA (nombre, iconos, colores)
-sw.js                       Service worker (red primero, copia local si no hay conexión)
-css/style.css               Estilos
-icons/                      Iconos PNG 192, 512 y 180 (iOS)
-js/
-  main.js                   Arranque, clave, carga de datos y rutas por #hash
-  config.js                 API_URL (ruta en el proxy de Netlify)
-  api.js                    Llamadas a la API
-  store.js                  Estado de la app + copia local para ir sin conexión
-  session.js                Clave de acceso guardada en el dispositivo
-  calc.js                   Cálculos puros (días hasta un objetivo, compras, ritmo…)
-  goal-info.js              Convierte un objetivo en título, fecha, progreso y detalle
-  chart.js                  Gráfica de línea en SVG
-  format.js                 Formato de números y fechas en español
-  html.js                   escapeHtml
-  ui/nav.js                 Menú inferior
-  screens/
-    home.js evolution.js goals.js purchases.js update.js settings.js login.js empty.js
-worker/
-  wrangler.jsonc            Configuración del Worker y enlace con D1 (binding DB)
-  src/
-    index.js                Entrada: valida clave y reparte la acción
-    auth.js json.js validate.js
-    handlers/               Una acción por fichero: getAll, addSnapshot, deleteSnapshot,
-                            addGoal, deleteGoal, saveSettings (+ index.js con el mapa)
-```
-
-## Datos (D1)
-
-Las tablas se crean a mano en la consola de D1 (no hay fichero de esquema en el repo). **Si cambia una tabla, se actualiza aquí y se avisa para ejecutar el cambio en la consola.** SQL con el que se crearon:
-
-```sql
-CREATE TABLE IF NOT EXISTS snapshots (id INTEGER PRIMARY KEY AUTOINCREMENT, taken_at TEXT NOT NULL, parcels INTEGER NOT NULL, daily_income REAL NOT NULL, balance REAL NOT NULL, counts TEXT);
-CREATE TABLE IF NOT EXISTS goals (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, target REAL NOT NULL);
-CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
-```
-
-Si la tabla `snapshots` ya existía sin `counts`, ejecutar una sola vez: `ALTER TABLE snapshots ADD COLUMN counts TEXT;`
-
-- **snapshots**: `id`, `taken_at` (ISO UTC), `parcels` (entero), `daily_income` ($), `balance` ($, ingresos acumulados), `counts` (JSON `{idTipo: cantidad}`, opcional). Un registro por cada vez que se pulsa *Actualizar mis parcelas*.
-- **goals**: `id`, `type` (`money` | `parcels` | `income`), `target`. El objetivo "Canjear X $" no se guarda: sale de los ajustes.
-- **settings**: `key`, `value`. `withdraw_threshold` (5), `ab_per_dollar` (25), `parcel_ab` (100), `income_multiplier` (1) y `parcel_types` (JSON `[{id, name, rate}]`, `rate` = $/segundo). Si falta alguno, la app usa esos valores por defecto.
-
-## API del Worker
-
-Siempre `POST` a la URL del Worker (a través del proxy) con cuerpo `text/plain`:
-
-```json
-{ "key": "<API_KEY>", "action": "<acción>", "payload": { } }
-```
-
-| Acción | Payload | Respuesta |
-|---|---|---|
-| `getAll` | — | `{ settings, parcel_types, snapshots, goals }` |
-| `addSnapshot` | `{ taken_at, parcels, daily_income, balance, counts? }` | `{ id }` |
-| `deleteSnapshot` | `{ id }` | `{ ok }` |
-| `addGoal` | `{ type, target }` | `{ id }` |
-| `deleteGoal` | `{ id }` | `{ ok }` |
-| `saveSettings` | uno o varios de `{ withdraw_threshold, ab_per_dollar, parcel_ab, income_multiplier, parcel_types }` | `{ ok }` |
-
-Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
-
-## Despliegue (primera vez)
-
-Sin instalar nada en el ordenador: todo desde los paneles web y GitHub.
-
-1. **Repositorio** `israelreyes-gif/atlas-earth-tracker` (público) — ✅ hecho.
-2. **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / `(root)`*. La app queda en `https://israelreyes-gif.github.io/atlas-earth-tracker/`.
-3. **D1**: en Cloudflare, *Storage & databases → D1 → Create database* con el nombre `atlas-earth-tracker`. Copiar su *Database ID*, pegarlo en `worker/wrangler.jsonc` (campo `database_id`) y, en la pestaña *Console* de la base de datos, ejecutar el SQL de la sección [Datos (D1)](#datos-d1).
-4. **Worker desde GitHub**: *Workers & Pages → Create → Import a repository* → elegir este repo. *Root directory*: `worker`. Cada commit en `main` despliega solo.
-   - URL del Worker: `https://atlas-earth-tracker.israel-reyes.workers.dev`. La dirección `workers.dev` debe estar activada (en `wrangler.jsonc`: `workers_dev: true`; en el panel, *Settings → Domains & Routes*, interruptor *Production*).
-5. **Secreto**: en el Worker, *Settings → Variables and Secrets → Add* → tipo *Secret*, nombre `API_KEY`, valor = la clave que se vaya a escribir en la app.
-6. **Proxy de Netlify**: en el repo del proxy (`israelreyes-gif/api-proxy`, privado), fichero `netlify/edge-functions/proxy.ts`, añadir al mapa `RUTAS` la línea `'atlas-earth': '<URL del Worker>'` y hacer commit en `main`.
-7. **Probar**: abrir la app, escribir la clave, pulsar *Actualizar mis parcelas* y guardar el primer registro.
-
-### Estado del despliegue
-
-- [x] Repositorio creado
-- [x] GitHub Pages activado
-- [x] D1 creada y `database_id` puesto en `worker/wrangler.jsonc`
-- [x] Tablas creadas en la consola de D1
-- [x] Worker conectado a GitHub y desplegado
-- [x] Secreto `API_KEY` creado
-- [x] Ruta `atlas-earth` añadida al proxy (repo `israelreyes-gif/api-proxy`)
-- [ ] Primer registro guardado desde la app
+- GitHub Pages: `https://israelreyes-gif.github.io/atlas-earth-tracker/`
+- Worker de Cloudflare conectado a este repo (raíz `worker`): `https://atlas-earth-tracker.israel-reyes.workers.dev`, con D1 `atlas-earth-tracker` y secreto `API_KEY`.
+- Proxy de Netlify (repo `israelreyes-gif/api-proxy`), ruta `atlas-earth`.
 
 ## Reglas del proyecto
 
@@ -164,8 +33,3 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 11. Rutas de archivos en el HTML/JS siempre **relativas** (la app vive en `/atlas-earth-tracker/`, no en la raíz del dominio).
 12. **Cambios que dependan de la base de datos** (columnas o tablas nuevas): dar primero el SQL, esperar a que el usuario diga "listo" y solo entonces subir el código.
 13. Commits a `main` (despliegan solos). Mensajes claros en español.
-
-## Pendiente / ideas
-
-- Si Atlas Earth cambia o se descubre un dato fiable, revisar los supuestos de cálculo de arriba.
-- Posibles mejoras: exportar/importar registros, avisos cuando se llegue al mínimo para canjear, varios ritmos de compra por escenario.
