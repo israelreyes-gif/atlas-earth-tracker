@@ -2,60 +2,106 @@
 
 PWA personal para llevar la cuenta de mi dinero en el juego móvil **Atlas Earth**: cuánto llevo ganado, cuánto tengo para gastar y cuánto gano al día y al mes según las parcelas que tengo.
 
-> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · el repo está vacío de código; este README define el alcance para empezar de nuevo.
+> **Este README es la fuente de verdad del proyecto.** Se actualiza en cada cambio (ver [Reglas del proyecto](#reglas-del-proyecto)). Última actualización: 2026-11-09 · primera versión con pantalla de inicio.
 
-## Para qué sirve esta app
+App: `https://israelreyes-gif.github.io/atlas-earth-tracker/`
 
-Para tener **mis números claros y realistas**. No sustituye a la app del juego: no sirve para canjear dinero ni para jugar. Sus tres cosas son:
+## Para qué sirve
 
-1. **Renta total acumulada** (en $): todo lo que llevo ganado desde el inicio. Es la cifra *"Renta total acumulada"* de la pantalla *Información del jugador* del juego. Nunca baja.
-2. **Saldo disponible** (en $): lo que tengo ahora mismo para gastar en parcelas o lo que quiera. Es la cifra de la parte superior de la pantalla principal del juego. Sube con lo que gano y baja cuando lo gasto.
-3. **Lo que gano al día**, calculado a partir de mis parcelas.
+Para tener **mis números claros y realistas**. No sustituye a la app del juego: no sirve para canjear dinero ni para jugar.
 
-La diferencia **Renta total acumulada − Saldo disponible** es lo que ya he **gastado** (canjeado por Atlas Bucks u otras cosas). Ejemplo real del 2026-11-09: 16,2263… $ − 0,2263… $ = 16 $ gastados.
+- **Renta total acumulada** ($): todo lo ganado desde el inicio (en el juego: *Información del jugador → Renta total acumulada*). Nunca baja.
+- **Saldo disponible** ($): lo que tengo para gastar (en el juego: la cifra de arriba del mapa). Sube con lo que gano y baja cuando gasto.
+- **Gastado** ($) = renta total acumulada − saldo disponible. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $.
+- **Ganancia al día y al mes**, calculada con mis parcelas por tipo.
 
-Las dos cifras se apuntan a mano, y entre apuntes la app las estima sumando lo ganado desde entonces (las dos suben al mismo ritmo).
+### Pantallas
 
-### Mis parcelas (el corazón de la app)
+| Pantalla | Qué hace |
+|---|---|
+| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. |
+| **Corregir el dinero** (`#money`) | Para volver a apuntar las dos cifras de dinero con las que muestra el juego. |
+| **Ajustes** (`#settings`) | Lo que da por segundo cada tipo de parcela (como en el juego) y cerrar sesión. |
 
-- Configuro **cuántas parcelas tengo y de qué tipo**, de forma cómoda (botones **+ y −** por cada tipo).
-- Cada **tipo** tiene un nombre y lo que da una parcela de ese tipo. Lo apunto **tal como lo muestra el juego (por segundo)** y la app lo pasa a día (× 86.400).
-- Con esa configuración, la app calcula la ganancia diaria **sin que yo escriba la cifra**: suma de (parcelas de cada tipo × lo que da cada una).
+### Cómo funciona el contador
 
-### Estadísticas que da
-
-- Lo que gano **al día** y **al mes** con mis parcelas actuales.
-- Desglose por tipo: cuánto aporta cada tipo al día y al mes.
-- Ganancia media por parcela.
-- La **renta total acumulada** y el **saldo disponible estimados en este momento**: último valor apuntado + lo ganado desde entonces.
-- Lo **gastado** hasta ahora (renta total acumulada − saldo disponible).
+- Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.
+- D1 solo se escribe cuando **cambio algo**: pulso + o − (se guarda 0,8 s después del último toque), corrijo el dinero o cambio las tarifas.
+- Al pulsar + o −, y al cambiar tarifas, la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
+- Es una **estimación con las tarifas base**: sin boosts ni pasaporte, así que sale por debajo de lo real. Si difiere del juego, se corrige en *Corregir el dinero*.
 
 ### Fuera de alcance (por ahora)
 
 - **Canjear dinero** (mínimo de 5 $): no se tiene en cuenta; para eso está la app real.
-- **Boosts (x20 y x50) y pasaporte**: se incluirán más adelante. Hasta entonces los cálculos usan solo el valor base de cada tipo de parcela.
+- **Boosts (x20 y x50) y pasaporte**: se incluirán más adelante.
 - Evolución, objetivos y compras: no forman parte de este alcance; solo se añaden si se piden.
 
 ## Datos del juego confirmados
 
 - Moneda: **dólares ($)**.
-- Los tipos de parcela son **Común, Raro, Épico y Legendario**. Mi cuenta el 2026-11-09: 28 Comunes, 15 Raras, 9 Épicas y 4 Legendarias (56 en total).
-- Hay parcelas de **distintos tipos** que dan distinta ganancia; el juego la muestra por segundo.
-- 1 $ de renta = 25 Atlas Bucks; una parcela = 100 AB = 4 $. *(Dato confirmado, hoy sin uso.)*
+- Tipos de parcela: **Común, Raro, Épico y Legendario**. Cuenta del 2026-11-09: 28, 15, 9 y 4 (56 en total).
+- El juego muestra lo que da cada parcela **por segundo**; la app lo pasa a día (× 86.400) y a mes (× 30,44).
+- Tarifas base por segundo cargadas al principio (de la captura de rarezas; revisables en Ajustes): Común 0,0000000011 · Raro 0,0000000016 · Épico 0,0000000022 · Legendario 0,0000000044.
+- 1 $ de renta = 25 Atlas Bucks; una parcela = 100 AB = 4 $. *(Confirmado, hoy sin uso.)*
 
-## Supuestos de los cálculos
+## Arquitectura
 
-- Ganancia al día = Σ (parcelas del tipo × $ por segundo × 86.400).
-- Ganancia al mes = ganancia al día × 30,44.
-- La renta total acumulada y el saldo disponible mostrados son una **estimación** entre dos apuntes.
-- No se inventan datos del juego: todo lo que no se sabe se configura o se pregunta.
+PWA (GitHub Pages) → proxy de Netlify (ruta `atlas-earth`) → Worker de Cloudflare → D1. El Worker no añade CORS (lo hace el proxy).
 
-## Infraestructura que ya existe
+- App: `https://israelreyes-gif.github.io/atlas-earth-tracker/`
+- API desde la PWA: `https://israelreyes-proxy.netlify.app/atlas-earth`
+- Worker (raíz `worker`, desplegado desde GitHub): `https://atlas-earth-tracker.israel-reyes.workers.dev`, con D1 `atlas-earth-tracker` (binding `DB`) y secreto `API_KEY`.
+- Proxy: repo privado `israelreyes-gif/api-proxy`, fichero `netlify/edge-functions/proxy.ts`, mapa `RUTAS`.
 
-- GitHub Pages: `https://israelreyes-gif.github.io/atlas-earth-tracker/`
-- Worker de Cloudflare conectado a este repo (raíz `worker`): `https://atlas-earth-tracker.israel-reyes.workers.dev`, con D1 `atlas-earth-tracker` y secreto `API_KEY`.
-- Proxy de Netlify (repo `israelreyes-gif/api-proxy`), ruta `atlas-earth`. La URL desde la PWA es `https://israelreyes-proxy.netlify.app/atlas-earth`.
-- Arquitectura: PWA → proxy Netlify → Worker → D1. El Worker no añade CORS.
+### Estructura
+
+```
+index.html · manifest.webmanifest · sw.js · icons/ · css/style.css
+js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
+     calc.js (cálculos) · format.js · rate-text.js · html.js · type-style.js (colores)
+     screens/ home.js · money.js · settings.js · login.js
+     ui/      hero.js (tarjeta verde) · tiles.js (cuadrícula con − y +)
+worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
+         src/handlers/ index.js · getAll.js · saveState.js · saveRates.js
+```
+
+## Datos (D1)
+
+Ejecutar en la consola de la base de datos (ya ejecutado el 2026-11-09, con las cifras de la captura de ese día):
+
+```sql
+DROP TABLE IF EXISTS snapshots;
+DROP TABLE IF EXISTS goals;
+DROP TABLE IF EXISTS settings;
+DROP TABLE IF EXISTS parcel_types;
+DROP TABLE IF EXISTS account;
+
+CREATE TABLE parcel_types (id TEXT PRIMARY KEY, name TEXT NOT NULL, rate REAL NOT NULL, count INTEGER NOT NULL DEFAULT 0, position INTEGER NOT NULL);
+CREATE TABLE account (id INTEGER PRIMARY KEY CHECK (id = 1), total_earned REAL NOT NULL, balance REAL NOT NULL, updated_at TEXT NOT NULL);
+
+INSERT INTO parcel_types (id, name, rate, count, position) VALUES
+  ('comun', 'Común', 0.0000000011, 28, 1),
+  ('raro', 'Raro', 0.0000000016, 15, 2),
+  ('epico', 'Épico', 0.0000000022, 9, 3),
+  ('legendario', 'Legendario', 0.0000000044, 4, 4);
+
+INSERT INTO account (id, total_earned, balance, updated_at) VALUES (1, 16.2263008904824, 0.2263008903948, '2026-11-09T20:53:00Z');
+```
+
+- **parcel_types**: `id`, `name`, `rate` ($ por segundo de una parcela), `count` (cuántas tengo), `position` (orden).
+- **account**: una sola fila (`id = 1`): `total_earned` ($), `balance` ($) y `updated_at` (instante ISO UTC al que corresponden esas cifras y los `count` actuales).
+
+## API del Worker
+
+Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acción>", "payload": { } }`.
+
+| Acción | Payload | Respuesta |
+|---|---|---|
+| `getAll` | — | `{ types: [{ id, name, rate, count }], account: { total_earned, balance, updated_at } }` |
+| `saveState` | `{ total_earned, balance, updated_at, counts?: { idTipo: entero } }` | `{ ok }` |
+| `saveRates` | `{ rates: { idTipo: $ por segundo } }` | `{ ok }` |
+
+Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 
 ## Reglas del proyecto
 
