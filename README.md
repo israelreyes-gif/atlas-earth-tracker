@@ -12,14 +12,14 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 - **Renta total acumulada** ($): todo lo ganado desde el inicio (en el juego: *Información del jugador → Renta total acumulada*). Nunca baja.
 - **Saldo disponible** ($): lo que tengo para gastar (en el juego: la cifra de arriba del mapa). Sube con lo que gano y baja cuando gasto.
-- **Gastado** ($) = renta total acumulada − saldo disponible. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $.
+- **Gastado** ($): lo que he gastado. Se guarda tal cual y no sube con el tiempo; solo cambia al apuntar un gasto con **− y +** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $, el − si no hay gasto). El saldo se calcula como renta total − gastado, así que con el tiempo solo se calcula el total. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $.
 - **Ganancia al día y al mes**, calculada con mis parcelas por tipo.
 
 ### Pantallas
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. Debajo de las parcelas, una tarjeta de **insignias** y otra de **boosts** (x20 y x50, con **− y +** de 1 hora, hasta 5 h, solo uno activo a la vez, con cuenta atrás en directo; mientras dura, el dinero sube x20 o x50 más rápido). La tarjeta de **insignias** del pasaporte con **− y +**: según cuántas tengas, suma su porcentaje de aumento a la ganancia (ver tabla abajo). No hay pantalla de ajustes: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
+| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. Debajo de las parcelas, una tarjeta de **insignias**, otra de **boosts** y otra de **gastado** (− y + de 1 $) (x20 y x50, con **− y +** de 1 hora, hasta 5 h, solo uno activo a la vez, con cuenta atrás en directo; mientras dura, el dinero sube x20 o x50 más rápido). La tarjeta de **insignias** del pasaporte con **− y +**: según cuántas tengas, suma su porcentaje de aumento a la ganancia (ver tabla abajo). No hay pantalla de ajustes: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
 | **Corregir el dinero** (`#money`) | Para volver a apuntar las dos cifras de dinero con las que muestra el juego. |
 
 ### Instalar como app (PWA)
@@ -113,8 +113,15 @@ INSERT INTO account (id, total_earned, balance, updated_at) VALUES (1, 16.226300
 ```
 
 - **parcel_types**: `id`, `name`, `rate` ($ por segundo de una parcela), `count` (cuántas tengo), `position` (orden).
-- **account**: una sola fila (`id = 1`): `total_earned` ($), `balance` ($), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
+- **account**: una sola fila (`id = 1`): `total_earned` ($, lo único que sube con el tiempo), `spent` ($ gastados; el saldo disponible es `total_earned − spent`; la columna antigua `balance` ya no se usa), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
 - **passport_levels**: `level`, `min_badges`, `max_badges`, `bonus` (0,05 = 5 %). Tabla del pasaporte de arriba.
+
+Para pasar a total + gastado (2026-11-10) se ejecutó:
+
+```sql
+ALTER TABLE account ADD COLUMN spent REAL NOT NULL DEFAULT 0;
+UPDATE account SET spent = total_earned - balance WHERE id = 1;
+```
 
 Para añadir los boosts (2026-11-10) se ejecutó:
 
@@ -137,8 +144,8 @@ Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acci�
 
 | Acción | Payload | Respuesta |
 |---|---|---|
-| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, balance, badges, boost_type, boost_seconds, updated_at } }` |
-| `saveState` | `{ total_earned, balance, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), counts?: { idTipo: entero } }` | `{ ok }` |
+| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, spent, badges, boost_type, boost_seconds, updated_at } }` |
+| `saveState` | `{ total_earned, spent, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), counts?: { idTipo: entero } }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 

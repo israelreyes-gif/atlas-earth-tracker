@@ -4,12 +4,12 @@ import { badRequest, requireDate, requireNumber } from '../validate.js';
 // Las dos cosas van juntas porque la app calcula el dinero con el ritmo que dan esas parcelas.
 export async function saveState(payload, env) {
   const totalEarned = requireNumber(payload.total_earned, 'total_earned');
-  const balance = requireNumber(payload.balance, 'balance');
+  const spent = requireNumber(payload.spent, 'spent');
   const updatedAt = requireDate(payload.updated_at, 'updated_at');
 
   const statements = [
-    env.DB.prepare('UPDATE account SET total_earned = ?, balance = ?, updated_at = ? WHERE id = 1')
-      .bind(totalEarned, balance, updatedAt),
+    env.DB.prepare('UPDATE account SET total_earned = ?, spent = ?, updated_at = ? WHERE id = 1')
+      .bind(totalEarned, spent, updatedAt),
   ];
 
   if (payload.boost_type !== undefined || payload.boost_seconds !== undefined) {

@@ -56,7 +56,7 @@ export async function persist(extra = {}) {
   await api.saveState({
     counts,
     total_earned: account.total_earned,
-    balance: account.balance,
+    spent: account.spent,
     badges: account.badges,
     boost_type: account.boost_type,
     boost_seconds: account.boost_seconds,

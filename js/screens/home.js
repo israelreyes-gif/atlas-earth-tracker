@@ -1,10 +1,11 @@
 // Inicio: dinero arriba (en directo), ganancia al día y al mes, parcelas por tipo e insignias, con + y −.
-import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, boostRemaining, dailyIncome, freezeAccount, monthlyIncome, totalParcels } from '../calc.js';
+import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, boostRemaining, dailyIncome, estimate, freezeAccount, monthlyIncome, totalParcels } from '../calc.js';
 import { formatDollar, formatNumber } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
 import { badgesHtml, refreshBadges, wireBadges } from '../ui/badges.js';
 import { boostsHtml, refreshBoosts, wireBoosts } from '../ui/boosts.js';
 import { heroHtml, tickHero } from '../ui/hero.js';
+import { refreshSpent, spentHtml, wireSpent } from '../ui/spent.js';
 import { refreshTiles, tilesHtml, wireTiles } from '../ui/tiles.js';
 
 const SAVE_DELAY_MS = 800;
@@ -25,6 +26,7 @@ export function renderHome(container) {
     ${tilesHtml(state.types, currentMultiplier())}
     ${badgesHtml()}
     ${boostsHtml()}
+    ${spentHtml()}
     <p class="muted small" id="status" role="status"></p>
     <button class="btn btn-light btn-small" type="button" id="retry" hidden>Reintentar guardar</button>`;
 
@@ -67,6 +69,8 @@ export function renderHome(container) {
   function tickAll() {
     tickHero(container);
     refreshBoosts(container, state.account, dailyIncome(state.types, currentMultiplier()));
+    const value = estimate(state.account, state.types, currentMultiplier(), new Date());
+    refreshSpent(container, value.spent, value.balance);
   }
 
   function afterChange() {
@@ -105,7 +109,19 @@ export function renderHome(container) {
     afterChange();
   }
 
+  // Apunta un gasto (+) o lo corrige (−): el total no cambia, el saldo baja o sube.
+  function changeSpent(delta) {
+    freezeMoney();
+    const balance = state.account.total_earned - state.account.spent;
+    if (delta > 0 && balance < delta) return;
+    const next = Math.max(0, state.account.spent + delta);
+    if (next === state.account.spent) return;
+    state.account = { ...state.account, spent: next };
+    afterChange();
+  }
+
   wireTiles(container, changeParcels);
+  wireSpent(container, changeSpent);
   wireBoosts(container, changeBoost);
   wireBadges(container, () => state.account.badges, changeBadges);
   retryButton.addEventListener('click', save);

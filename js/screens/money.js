@@ -1,4 +1,4 @@
-// Corregir las dos cifras de dinero con las que muestra el juego.
+// Corregir las cifras de dinero con las que muestra el juego (de ellas salen el total y lo gastado).
 import { boostRemaining, estimate } from '../calc.js';
 import { parseNumber, toInputValue } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
@@ -49,7 +49,7 @@ export function renderMoney(container) {
     state.account = {
       ...state.account,
       total_earned: total,
-      balance,
+      spent: total - balance,
       boost_type: left > 0 ? state.account.boost_type : 0,
       boost_seconds: left,
       updated_at: moment.toISOString(),

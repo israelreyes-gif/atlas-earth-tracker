@@ -45,7 +45,8 @@ export function boostRemaining(account, now) {
   return Math.max(0, account.boost_seconds - secondsSince(account, now));
 }
 
-// Cifras de dinero en este instante: lo último apuntado + lo ganado desde entonces.
+// Cifras de dinero en este instante: solo el total sube con el tiempo; el saldo es total − gastado.
+// Lo ganado desde lo último apuntado se suma al total.
 // Mientras dura el boost se gana "boost_type" veces más; después, el ritmo normal.
 export function estimate(account, types, multiplier, now) {
   const seconds = secondsSince(account, now);
@@ -54,8 +55,8 @@ export function estimate(account, types, multiplier, now) {
   const earned = incomePerSecond(types, multiplier) * (seconds + boosted * factor);
   return {
     total: account.total_earned + earned,
-    balance: account.balance + earned,
-    spent: account.total_earned - account.balance,
+    spent: account.spent,
+    balance: account.total_earned + earned - account.spent,
   };
 }
 
@@ -66,7 +67,6 @@ export function freezeAccount(account, types, multiplier, now) {
   return {
     ...account,
     total_earned: value.total,
-    balance: value.balance,
     boost_type: left > 0 ? account.boost_type : 0,
     boost_seconds: left,
     updated_at: now.toISOString(),
