@@ -1,4 +1,4 @@
-// Corregir las cifras de dinero con las que muestra el juego (de ellas salen el total y lo gastado).
+// Corregir la renta total acumulada con la cifra que muestra el juego. Lo gastado no cambia: el saldo sale de total − gastado.
 import { boostRemaining, estimate } from '../calc.js';
 import { parseNumber, toInputValue } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
@@ -8,17 +8,12 @@ export function renderMoney(container) {
 
   container.innerHTML = `
     <h1>Corregir el dinero</h1>
-    <p class="muted">Copia las cifras que ves ahora en el juego.</p>
+    <p class="muted">Copia la cifra que ves ahora en el juego. El saldo se calcula solo restando lo gastado.</p>
     <form class="card" id="money-form" novalidate>
       <div class="field">
         <label for="total">Renta total acumulada ($)</label>
         <input id="total" inputmode="decimal" value="${toInputValue(now.total, 8)}">
         <span class="muted small">En el juego: Información del jugador → Renta total acumulada.</span>
-      </div>
-      <div class="field">
-        <label for="balance">Saldo disponible ($)</label>
-        <input id="balance" inputmode="decimal" value="${toInputValue(now.balance, 8)}">
-        <span class="muted small">En el juego: la cifra de arriba del mapa.</span>
       </div>
       <p class="error" id="message" role="alert"></p>
       <button class="btn btn-dark" type="submit">Guardar</button>
@@ -31,13 +26,12 @@ export function renderMoney(container) {
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const total = parseNumber(form.total.value);
-    const balance = parseNumber(form.balance.value);
-    if (!(total >= 0) || !(balance >= 0)) {
-      message.textContent = 'Escribe las dos cifras como números.';
+    if (!(total >= 0)) {
+      message.textContent = 'Escribe la cifra como número.';
       return;
     }
-    if (balance > total) {
-      message.textContent = 'El saldo no puede ser mayor que la renta total acumulada.';
+    if (total < state.account.spent) {
+      message.textContent = 'La renta total no puede ser menor que lo gastado.';
       return;
     }
 
@@ -49,7 +43,6 @@ export function renderMoney(container) {
     state.account = {
       ...state.account,
       total_earned: total,
-      spent: total - balance,
       boost_type: left > 0 ? state.account.boost_type : 0,
       boost_seconds: left,
       updated_at: moment.toISOString(),
