@@ -304,3 +304,9 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .badges-controls .tile-btn { flex: none; width: 48px; }
 .badges-count { min-width: 44px; text-align: center; font-size: 24px; }
 .badges .title { font-size: 16px; font-weight: 600; }
+
+/* Boosts */
+.boosts { display: flex; flex-direction: column; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+.boost-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.boost-row .title { font-size: 16px; font-weight: 600; }
+.tile-btn:disabled { opacity: 0.35; cursor: not-allowed; }

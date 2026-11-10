@@ -1,5 +1,5 @@
 // Corregir las dos cifras de dinero con las que muestra el juego.
-import { estimate } from '../calc.js';
+import { boostRemaining, estimate } from '../calc.js';
 import { parseNumber, toInputValue } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
 
@@ -43,7 +43,17 @@ export function renderMoney(container) {
 
     const button = form.querySelector('button[type="submit"]');
     button.disabled = true;
-    state.account = { ...state.account, total_earned: total, balance, updated_at: new Date().toISOString() };
+    // El boost sigue corriendo: se guarda lo que queda a partir de este instante.
+    const moment = new Date();
+    const left = Math.ceil(boostRemaining(state.account, moment));
+    state.account = {
+      ...state.account,
+      total_earned: total,
+      balance,
+      boost_type: left > 0 ? state.account.boost_type : 0,
+      boost_seconds: left,
+      updated_at: moment.toISOString(),
+    };
     try {
       await persist();
       location.hash = '#home';

@@ -58,6 +58,8 @@ export async function persist(extra = {}) {
     total_earned: account.total_earned,
     balance: account.balance,
     badges: account.badges,
+    boost_type: account.boost_type,
+    boost_seconds: account.boost_seconds,
     updated_at: account.updated_at,
     ...extra,
   });

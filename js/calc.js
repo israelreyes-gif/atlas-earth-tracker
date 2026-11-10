@@ -30,13 +30,45 @@ export function totalParcels(types) {
   return types.reduce((sum, type) => sum + type.count, 0);
 }
 
+// Boost: account.boost_type (0, 20 o 50 = multiplicador) y account.boost_seconds (segundos que quedan en updated_at).
+export const BOOST_TYPES = [20, 50];
+export const BOOST_STEP_SECONDS = 3600;
+export const BOOST_MAX_SECONDS = 5 * 3600;
+
+function secondsSince(account, now) {
+  return Math.max(0, (now - new Date(account.updated_at)) / 1000);
+}
+
+// Segundos de boost que quedan en este instante.
+export function boostRemaining(account, now) {
+  if (!account.boost_type) return 0;
+  return Math.max(0, account.boost_seconds - secondsSince(account, now));
+}
+
 // Cifras de dinero en este instante: lo último apuntado + lo ganado desde entonces.
+// Mientras dura el boost se gana "boost_type" veces más; después, el ritmo normal.
 export function estimate(account, types, multiplier, now) {
-  const seconds = Math.max(0, (now - new Date(account.updated_at)) / 1000);
-  const earned = incomePerSecond(types, multiplier) * seconds;
+  const seconds = secondsSince(account, now);
+  const boosted = account.boost_type ? Math.min(seconds, account.boost_seconds) : 0;
+  const factor = account.boost_type ? account.boost_type - 1 : 0;
+  const earned = incomePerSecond(types, multiplier) * (seconds + boosted * factor);
   return {
     total: account.total_earned + earned,
     balance: account.balance + earned,
     spent: account.total_earned - account.balance,
+  };
+}
+
+// La cuenta fijada en "now": dinero al instante y boost con lo que queda desde ahí.
+export function freezeAccount(account, types, multiplier, now) {
+  const value = estimate(account, types, multiplier, now);
+  const left = Math.ceil(boostRemaining(account, now));
+  return {
+    ...account,
+    total_earned: value.total,
+    balance: value.balance,
+    boost_type: left > 0 ? account.boost_type : 0,
+    boost_seconds: left,
+    updated_at: now.toISOString(),
   };
 }

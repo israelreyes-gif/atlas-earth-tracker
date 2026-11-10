@@ -1,8 +1,9 @@
 // Inicio: dinero arriba (en directo), ganancia al día y al mes, parcelas por tipo e insignias, con + y −.
-import { dailyIncome, estimate, monthlyIncome, totalParcels } from '../calc.js';
+import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, boostRemaining, dailyIncome, freezeAccount, monthlyIncome, totalParcels } from '../calc.js';
 import { formatDollar, formatNumber } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
 import { badgesHtml, refreshBadges, wireBadges } from '../ui/badges.js';
+import { boostsHtml, refreshBoosts, wireBoosts } from '../ui/boosts.js';
 import { heroHtml, tickHero } from '../ui/hero.js';
 import { refreshTiles, tilesHtml, wireTiles } from '../ui/tiles.js';
 
@@ -23,6 +24,7 @@ export function renderHome(container) {
     </div>
     ${tilesHtml(state.types, currentMultiplier())}
     ${badgesHtml()}
+    ${boostsHtml()}
     <p class="muted small" id="status" role="status"></p>
     <button class="btn btn-light btn-small" type="button" id="retry" hidden>Reintentar guardar</button>`;
 
@@ -56,16 +58,20 @@ export function renderHome(container) {
     });
   }
 
-  // Se fija el dinero que llevabas hasta ahora y desde aquí cuenta con el nuevo ritmo.
+  // Se fija el dinero (y lo que queda de boost) hasta ahora y desde aquí cuenta con el nuevo ritmo.
   function freezeMoney() {
-    const now = new Date();
-    const value = estimate(state.account, state.types, currentMultiplier(), now);
-    state.account = { ...state.account, total_earned: value.total, balance: value.balance, updated_at: now.toISOString() };
+    state.account = freezeAccount(state.account, state.types, currentMultiplier(), new Date());
+  }
+
+  // Cada segundo: cifras de dinero y boosts.
+  function tickAll() {
+    tickHero(container);
+    refreshBoosts(container, state.account, dailyIncome(state.types, currentMultiplier()));
   }
 
   function afterChange() {
     refreshAll();
-    tickHero(container);
+    tickAll();
     statusEl.textContent = 'Cambios sin guardar…';
     clearTimeout(timer);
     timer = setTimeout(save, SAVE_DELAY_MS);
@@ -86,12 +92,25 @@ export function renderHome(container) {
     afterChange();
   }
 
+  // + suma una hora al boost (solo si no hay otro tipo activo); − quita una hora.
+  function changeBoost(type, delta) {
+    freezeMoney();
+    const left = boostRemaining(state.account, new Date(state.account.updated_at));
+    const active = left > 0 ? state.account.boost_type : 0;
+    if (delta > 0 && active !== 0 && active !== type) return;
+    if (delta < 0 && active !== type) return;
+    const next = Math.min(BOOST_MAX_SECONDS, Math.max(0, left + delta * BOOST_STEP_SECONDS));
+    state.account = { ...state.account, boost_type: next > 0 ? type : 0, boost_seconds: next };
+    afterChange();
+  }
+
   wireTiles(container, changeParcels);
+  wireBoosts(container, changeBoost);
   wireBadges(container, () => state.account.badges, changeBadges);
   retryButton.addEventListener('click', save);
   refreshAll();
-  tickHero(container);
-  const tick = setInterval(() => tickHero(container), 1000);
+  tickAll();
+  const tick = setInterval(tickAll, 1000);
 
   return () => {
     clearInterval(tick);

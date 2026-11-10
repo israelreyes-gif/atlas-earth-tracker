@@ -19,7 +19,7 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. Debajo de las parcelas, una tarjeta de **insignias** del pasaporte con **− y +**: según cuántas tengas, suma su porcentaje de aumento a la ganancia (ver tabla abajo). No hay pantalla de ajustes: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
+| **Inicio** (`#home`) | Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. Debajo de las parcelas, una tarjeta de **insignias** y otra de **boosts** (x20 y x50, con **− y +** de 1 hora, hasta 5 h, solo uno activo a la vez, con cuenta atrás en directo; mientras dura, el dinero sube x20 o x50 más rápido). La tarjeta de **insignias** del pasaporte con **− y +**: según cuántas tengas, suma su porcentaje de aumento a la ganancia (ver tabla abajo). No hay pantalla de ajustes: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
 | **Corregir el dinero** (`#money`) | Para volver a apuntar las dos cifras de dinero con las que muestra el juego. |
 
 ### Instalar como app (PWA)
@@ -34,13 +34,13 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
 
 - Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.
 - D1 solo se escribe cuando **cambio algo**: pulso + o − (se guarda 0,8 s después del último toque) o corrijo el dinero.
-- Al pulsar + o − (parcelas o insignias), la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
-- Es una **estimación con las tarifas base más el aumento de las insignias**: sin boosts, así que sale por debajo de lo real cuando hay un boost activo. Si difiere del juego, se corrige en *Corregir el dinero*.
+- Al pulsar + o − (parcelas, insignias o boosts), la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
+- Es una **estimación con las tarifas base, el aumento de las insignias y el boost que se haya apuntado**. Si el boost no se apunta en la app, sale por debajo de lo real.
+- "Ganas al día" y "al mes" son **sin boost** (para tener una cifra estable); la tarjeta de boosts muestra lo que se gana al día con el boost activo. Si difiere del juego, se corrige en *Corregir el dinero*.
 
 ### Fuera de alcance (por ahora)
 
 - **Canjear dinero** (mínimo de 5 $): no se tiene en cuenta; para eso está la app real.
-- **Boosts (x20 y x50)**: se incluirán más adelante (el x20 dura 1 hora cada vez que se activa).
 - Evolución, objetivos y compras: no forman parte de este alcance; solo se añaden si se piden.
 
 ## Datos del juego confirmados
@@ -59,6 +59,7 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
   | 5 | 101–9999 | 25 % |
 
   La ganancia por segundo es Σ(parcelas × tarifa) × (1 + aumento). El número de insignias lo apunta el usuario en la app (empieza en 0).
+- **Boosts**: x20 y x50. Solo puede haber **un tipo activo** a la vez. Se pueden acumular hasta **5 horas**; el x20 dura 1 hora cada vez que se activa. La ganancia por segundo durante el boost es Σ(parcelas × tarifa) × (1 + aumento de insignias) × boost (x20 con +5 % de insignias da x21; comprobado con capturas del juego).
 - El juego muestra lo que da cada parcela **por segundo**; la app lo pasa a día (× 86.400) y a mes (× 30,44).
 - Tarifas base por segundo (de la captura de rarezas; fijas, solo se cambian en la base de datos): Común 0,0000000011 · Raro 0,0000000016 · Épico 0,0000000022 · Legendario 0,0000000044.
 - **Boost x20 confirmado** (2026-11-09): con él activo, el saldo subió unos 0,17 $/día frente a los 0,008 $/día del cálculo base (≈ x21, es decir x20 más el +5 % de insignias, a falta de confirmar cómo se combinan). Está pendiente de incluir.
@@ -81,7 +82,7 @@ icons/  icon.svg (original del icono) · icon-192/512.png · icon-maskable-512.p
 js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
      calc.js (cálculos) · format.js · html.js · type-style.js (colores)
      screens/ home.js · money.js · login.js
-     ui/      hero.js (tarjeta verde) · tiles.js (cuadrícula con − y +) · badges.js (insignias)
+     ui/      hero.js (tarjeta verde) · tiles.js (cuadrícula con − y +) · badges.js (insignias) · boosts.js (boosts)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
          src/handlers/ index.js · getAll.js · saveState.js
 ```
@@ -112,8 +113,15 @@ INSERT INTO account (id, total_earned, balance, updated_at) VALUES (1, 16.226300
 ```
 
 - **parcel_types**: `id`, `name`, `rate` ($ por segundo de una parcela), `count` (cuántas tengo), `position` (orden).
-- **account**: una sola fila (`id = 1`): `total_earned` ($), `balance` ($), `badges` (número de insignias) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
+- **account**: una sola fila (`id = 1`): `total_earned` ($), `balance` ($), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
 - **passport_levels**: `level`, `min_badges`, `max_badges`, `bonus` (0,05 = 5 %). Tabla del pasaporte de arriba.
+
+Para añadir los boosts (2026-11-10) se ejecutó:
+
+```sql
+ALTER TABLE account ADD COLUMN boost_type INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE account ADD COLUMN boost_seconds INTEGER NOT NULL DEFAULT 0;
+```
 
 Para añadir las insignias (2026-11-09) se ejecutó:
 
@@ -129,8 +137,8 @@ Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acci�
 
 | Acción | Payload | Respuesta |
 |---|---|---|
-| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, balance, badges, updated_at } }` |
-| `saveState` | `{ total_earned, balance, updated_at, badges?: entero, counts?: { idTipo: entero } }` | `{ ok }` |
+| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, balance, badges, boost_type, boost_seconds, updated_at } }` |
+| `saveState` | `{ total_earned, balance, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), counts?: { idTipo: entero } }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 
