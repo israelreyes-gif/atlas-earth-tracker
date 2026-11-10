@@ -338,3 +338,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .fit .screen, .screen.fit { gap: 10px; }
 .legend { flex-direction: row; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; margin-top: 0; }
 .legend i { width: 14px; height: 4px; margin-right: 5px; }
+
+/* Aviso de última corrección */
+.hero .hero-corrected { font-size: 12px; color: #E4F1E9; }
+.hero .hero-corrected.stale { margin-top: 6px; padding: 8px 10px; border-radius: 10px; background: var(--amber); color: var(--ink); font-size: 13px; font-weight: 700; }

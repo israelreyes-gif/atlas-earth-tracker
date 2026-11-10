@@ -19,7 +19,7 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego". Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, y dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás). |
+| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego" y debajo cuánto hace de la última corrección ("Última corrección: hace 2 días"); a partir de **7 días** sale en una franja ámbar con el aviso de comparar con el juego. Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, y dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás). |
 | **Configuración** (`#settings`) | Una pantalla con una tarjeta por sección, todas con **− y +**: **Parcelas** (por tipo, con lo que gana cada una al día), **Insignias** (según cuántas tengas suma su porcentaje de aumento; tabla abajo), **Boosts** (x20 y x50, 1 hora por pulsación, hasta 5 h, solo uno activo a la vez, el + se bloquea si pasaría de 5 h, con cuenta atrás) y **Gastado** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $). Los cambios se guardan solos. No hay ajustes de las tarifas: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
 | **Progresión** (`#progress`) | Se abre con el icono de gráfica junto al engranaje. Pestañas **Hoy, Mes, 3 meses y Año** con escalas de 0,1 / 1 / 2 / 10 $ (si un valor se pasa, la escala se duplica). Arriba la **desviación** respecto a lo esperado (en $ y %, con las horas de boost hechas frente a las que tocaban); debajo la gráfica con la línea esperada (ámbar), la real (verde, continua hasta ahora y discontinua a tu ritmo) y el espacio entre ambas sombreado en verde (por encima) o rojo (por debajo); y abajo lo que se espera ganar al terminar el periodo. La pantalla **no tiene scroll** en el iPhone: la gráfica ocupa el hueco que queda y se redibuja al cambiar el tamaño. Todo en $ ganados desde el inicio del periodo (o desde el primer punto del historial si es posterior). |
 | **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo gastado no cambia (se toca con − y + en Configuración) y el saldo sale de total − gastado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
@@ -85,7 +85,7 @@ js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · sto
      editor.js (cambios de la configuración y guardado) · calc.js (cálculos) · format.js · html.js · type-style.js (colores)
      screens/ home.js (resumen) · settings.js (configuración) · progress.js (progresión) · money.js · login.js
      progress/ period.js (rangos y escalas) · boost-stats.js (boost del historial) · series.js (real y esperado)
-     ui/      hero.js (tarjeta verde) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
+     ui/      hero.js (tarjeta verde) · corrected.js (aviso de última corrección) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
          src/handlers/ index.js · getAll.js · getHistory.js · saveState.js
 ```
@@ -117,8 +117,15 @@ INSERT INTO account (id, total_earned, balance, updated_at) VALUES (1, 16.226300
 
 - **parcel_types**: `id`, `name`, `rate` ($ por segundo de una parcela), `count` (cuántas tengo), `position` (orden).
 - **history**: un punto por cada guardado (`at` = instante ISO UTC, `total_earned`, `boost_type`, `boost_seconds` = lo que queda de boost en ese instante, `rate` = $/s sin boost con las parcelas e insignias de ese momento). `saveState` lo escribe (con `INSERT OR REPLACE` por `at`, así reintentar no duplica) y `getHistory` lo devuelve. El historial empieza el día que se despliega: no se puede reconstruir lo anterior.
-- **account**: una sola fila (`id = 1`): `total_earned` ($, lo único que sube con el tiempo), `spent` ($ gastados; el saldo disponible es `total_earned − spent`; la columna antigua `balance` ya no se usa), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
+- **account**: una sola fila (`id = 1`): `total_earned` ($, lo único que sube con el tiempo), `spent` ($ gastados; el saldo disponible es `total_earned − spent`; la columna antigua `balance` ya no se usa), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`), `corrected_at` (instante ISO UTC de la última corrección con las cifras del juego, que alimenta el aviso del inicio) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
 - **passport_levels**: `level`, `min_badges`, `max_badges`, `bonus` (0,05 = 5 %). Tabla del pasaporte de arriba.
+
+Para el aviso de última corrección (2026-11-10) se ejecutó:
+
+```sql
+ALTER TABLE account ADD COLUMN corrected_at TEXT;
+UPDATE account SET corrected_at = '2026-11-10T09:36:15Z' WHERE id = 1;
+```
 
 Para el historial de la pantalla Progresión (2026-11-10) se ejecutó:
 
@@ -160,9 +167,9 @@ Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acci�
 
 | Acción | Payload | Respuesta |
 |---|---|---|
-| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, spent, badges, boost_type, boost_seconds, updated_at } }` |
+| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, spent, badges, boost_type, boost_seconds, corrected_at, updated_at } }` |
 | `getHistory` | `{ since?: fecha ISO }` (por defecto, los últimos 400 días) | `{ points: [{ at, total_earned, boost_type, boost_seconds, rate }] }` |
-| `saveState` | `{ total_earned, spent, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), rate?: número ($/s sin boost; si viene, se añade un punto al historial), counts?: { idTipo: entero } }` | `{ ok }` |
+| `saveState` | `{ total_earned, spent, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), corrected_at?: fecha ISO de la última corrección, rate?: número ($/s sin boost; si viene, se añade un punto al historial), counts?: { idTipo: entero } }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 

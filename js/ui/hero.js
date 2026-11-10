@@ -2,6 +2,7 @@
 import { estimate } from '../calc.js';
 import { formatDollar } from '../format.js';
 import { currentMultiplier, state } from '../store.js';
+import { correctedNotice } from './corrected.js';
 
 export function heroHtml() {
   return `
@@ -15,6 +16,7 @@ export function heroHtml() {
         <span class="num" id="hero-spent"></span>
       </div>
       <a class="hero-link" href="#money">Corregir con las cifras del juego</a>
+      <span class="hero-corrected" id="hero-corrected"></span>
     </section>`;
 }
 
@@ -24,4 +26,8 @@ export function tickHero(root) {
   root.querySelector('#hero-total').textContent = formatDollar(value.total, 8);
   root.querySelector('#hero-balance').textContent = formatDollar(value.balance, 8);
   root.querySelector('#hero-spent').textContent = formatDollar(value.spent, 2);
+  const notice = correctedNotice(state.account, new Date());
+  const note = root.querySelector('#hero-corrected');
+  note.textContent = notice.stale ? `⚠ ${notice.text}` : notice.text;
+  note.classList.toggle('stale', notice.stale);
 }

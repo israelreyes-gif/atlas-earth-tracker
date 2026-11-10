@@ -31,6 +31,12 @@ export async function saveState(payload, env) {
     );
   }
 
+  // Fecha de la última corrección con las cifras del juego (opcional).
+  if (payload.corrected_at) {
+    const correctedAt = requireDate(payload.corrected_at, 'corrected_at');
+    statements.push(env.DB.prepare('UPDATE account SET corrected_at = ? WHERE id = 1').bind(correctedAt));
+  }
+
   if (payload.badges !== undefined) {
     const badges = requireNumber(payload.badges, 'badges', { integer: true });
     if (badges > 9999) throw badRequest('badges no puede ser mayor que 9999');

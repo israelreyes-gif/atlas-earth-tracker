@@ -43,6 +43,7 @@ export function renderMoney(container) {
     state.account = {
       ...state.account,
       total_earned: total,
+      corrected_at: moment.toISOString(),
       boost_type: left > 0 ? state.account.boost_type : 0,
       boost_seconds: left,
       updated_at: moment.toISOString(),

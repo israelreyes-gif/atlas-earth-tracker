@@ -60,6 +60,7 @@ export async function persist(extra = {}) {
     badges: account.badges,
     boost_type: account.boost_type,
     boost_seconds: account.boost_seconds,
+    corrected_at: account.corrected_at,
     updated_at: account.updated_at,
     rate: incomePerSecond(types, multiplierFor(account, state.levels)),
     ...extra,
