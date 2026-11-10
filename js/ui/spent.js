@@ -8,7 +8,7 @@ export function spentHtml() {
     <section class="badges" aria-label="Gastado">
       <div class="badges-info">
         <span class="title">Gastado</span>
-        <span class="muted small">Apunta lo que gastas: ${SPENT_STEP} $ por pulsación</span>
+        <span class="muted small">${SPENT_STEP} $ por pulsación</span>
       </div>
       <div class="badges-controls">
         <button type="button" class="tile-btn" data-spent="-1" aria-label="Quitar ${SPENT_STEP} dólar de gastado">−</button>

@@ -2,7 +2,7 @@
 import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, BOOST_TYPES, boostRemaining } from '../calc.js';
 import { formatDollar } from '../format.js';
 
-function clock(seconds) {
+export function clock(seconds) {
   const total = Math.ceil(seconds);
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);

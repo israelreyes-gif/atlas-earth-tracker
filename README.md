@@ -19,8 +19,9 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Arriba a la izquierda, un **reloj con segundos** (hora del móvil) para que las capturas lleven la hora exacta y se pueda comparar con el juego sin desajustes. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**. Debajo, ganancia al día y al mes. Abajo, cuadrícula de colores con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado), cada una con **− y +**. Debajo de las parcelas, una tarjeta de **insignias**, otra de **boosts** y otra de **gastado** (− y + de 1 $) (x20 y x50, con **− y +** de 1 hora, hasta 5 h, solo uno activo a la vez, con cuenta atrás en directo; mientras dura, el dinero sube x20 o x50 más rápido). La tarjeta de **insignias** del pasaporte con **− y +**: según cuántas tengas, suma su porcentaje de aumento a la ganancia (ver tabla abajo). No hay pantalla de ajustes: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
-| **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo gastado no cambia (se toca con − y + en Inicio) y el saldo sale de total − gastado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
+| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego". Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, y dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás). |
+| **Configuración** (`#settings`) | Una pantalla con una tarjeta por sección, todas con **− y +**: **Parcelas** (por tipo, con lo que gana cada una al día), **Insignias** (según cuántas tengas suma su porcentaje de aumento; tabla abajo), **Boosts** (x20 y x50, 1 hora por pulsación, hasta 5 h, solo uno activo a la vez, el + se bloquea si pasaría de 5 h, con cuenta atrás) y **Gastado** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $). Los cambios se guardan solos. No hay ajustes de las tarifas: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
+| **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo gastado no cambia (se toca con − y + en Configuración) y el saldo sale de total − gastado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
 
 ### Instalar como app (PWA)
 
@@ -34,9 +35,9 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
 
 - Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.
 - D1 solo se escribe cuando **cambio algo**: pulso + o − (se guarda 0,8 s después del último toque) o corrijo el dinero.
-- Al pulsar + o − (parcelas, insignias o boosts), la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
+- Al pulsar + o − en Configuración (parcelas, insignias, boosts o gastado), la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
 - Es una **estimación con las tarifas base, el aumento de las insignias y el boost que se haya apuntado**. Si el boost no se apunta en la app, sale por debajo de lo real.
-- "Ganas al día" y "al mes" son **sin boost** (para tener una cifra estable); la tarjeta de boosts muestra lo que se gana al día con el boost activo. Si difiere del juego, se corrige en *Corregir el dinero*.
+- "Ganas al día" y "al mes" son **sin boost** (para tener una cifra estable); la tarjeta de boosts muestra lo que se gana al día con el boost activo. Si difiere del juego, se corrige en *Corregir el dinero*. En Inicio no se cambia nada: todo se configura en Configuración (engranaje).
 
 ### Fuera de alcance (por ahora)
 
@@ -80,9 +81,9 @@ PWA (GitHub Pages) → proxy de Netlify (ruta `atlas-earth`) → Worker de Cloud
 index.html · manifest.webmanifest · sw.js · css/style.css
 icons/  icon.svg (original del icono) · icon-192/512.png · icon-maskable-512.png · apple-touch-icon.png
 js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
-     calc.js (cálculos) · format.js · html.js · type-style.js (colores)
-     screens/ home.js · money.js · login.js
-     ui/      hero.js (tarjeta verde) · tiles.js (cuadrícula con − y +) · badges.js (insignias) · boosts.js (boosts)
+     editor.js (cambios de la configuración y guardado) · calc.js (cálculos) · format.js · html.js · type-style.js (colores)
+     screens/ home.js (resumen) · settings.js (configuración) · money.js · login.js
+     ui/      hero.js (tarjeta verde) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
          src/handlers/ index.js · getAll.js · saveState.js
 ```

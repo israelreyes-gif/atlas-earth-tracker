@@ -302,7 +302,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .badges-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .badges-controls { display: flex; align-items: center; gap: 8px; }
 .badges-controls .tile-btn { flex: none; width: 48px; }
-.badges-count { min-width: 44px; text-align: center; font-size: 24px; }
+.badges-count { min-width: 44px; text-align: center; font-size: 24px; white-space: nowrap; }
 .badges .title { font-size: 16px; font-weight: 600; }
 
 /* Boosts */
@@ -311,5 +311,12 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .boost-row .title { font-size: 16px; font-weight: 600; }
 .tile-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Reloj */
-.clock { font-size: 22px; font-variant-numeric: tabular-nums; }
+/* Inicio: fichas de parcelas y configuración */
+.chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.chip { padding: 10px 4px; border-radius: 16px; }
+.chip .tile-count { font-size: 28px; }
+.chip .tile-name { font-size: 10px; }
+.card h2 { margin-bottom: 2px; }
+.parcel-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; }
+.parcel-row .badges-controls .tile-btn { flex: none; width: 48px; }
+.icon-btn { color: var(--ink); text-decoration: none; }
