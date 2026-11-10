@@ -4,6 +4,7 @@ import { formatDollar, formatNumber } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
 import { badgesHtml, refreshBadges, wireBadges } from '../ui/badges.js';
 import { boostsHtml, refreshBoosts, wireBoosts } from '../ui/boosts.js';
+import { clockHtml, tickClock } from '../ui/clock.js';
 import { heroHtml, tickHero } from '../ui/hero.js';
 import { refreshSpent, spentHtml, wireSpent } from '../ui/spent.js';
 import { refreshTiles, tilesHtml, wireTiles } from '../ui/tiles.js';
@@ -12,7 +13,7 @@ const SAVE_DELAY_MS = 800;
 
 export function renderHome(container) {
   container.innerHTML = `
-    <h1>Atlas Tracker</h1>
+    <div class="row between">${clockHtml()}<h1>Atlas Tracker</h1></div>
     ${state.offline ? '<p class="muted"><span class="pill">Sin conexión · datos guardados</span></p>' : ''}
     ${heroHtml()}
     <div class="grid2">
@@ -67,6 +68,7 @@ export function renderHome(container) {
 
   // Cada segundo: cifras de dinero y boosts.
   function tickAll() {
+    tickClock(container);
     tickHero(container);
     refreshBoosts(container, state.account, dailyIncome(state.types, currentMultiplier()));
     const value = estimate(state.account, state.types, currentMultiplier(), new Date());
