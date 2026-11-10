@@ -320,3 +320,8 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .parcel-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 0; }
 .parcel-row .badges-controls .tile-btn { flex: none; width: 48px; }
 .icon-btn { color: var(--ink); text-decoration: none; }
+
+/* Progresión */
+.progress-body { display: flex; flex-direction: column; gap: 14px; }
+.legend { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }

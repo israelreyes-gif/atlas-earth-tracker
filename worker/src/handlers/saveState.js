@@ -22,6 +22,15 @@ export async function saveState(payload, env) {
     );
   }
 
+  // Punto del historial: el total, el boost y el ritmo ($/s sin boost) en este instante. Opcional para no romper versiones antiguas de la app.
+  if (payload.rate !== undefined) {
+    const rate = requireNumber(payload.rate, 'rate');
+    statements.push(
+      env.DB.prepare('INSERT OR REPLACE INTO history (at, total_earned, boost_type, boost_seconds, rate) VALUES (?, ?, ?, ?, ?)')
+        .bind(updatedAt, totalEarned, payload.boost_type ?? 0, payload.boost_seconds ?? 0, rate),
+    );
+  }
+
   if (payload.badges !== undefined) {
     const badges = requireNumber(payload.badges, 'badges', { integer: true });
     if (badges > 9999) throw badRequest('badges no puede ser mayor que 9999');

@@ -19,5 +19,6 @@ async function call(action, payload = {}) {
 
 export const api = {
   getAll: () => call('getAll'),
+  getHistory: (since) => call('getHistory', since ? { since } : {}),
   saveState: (state) => call('saveState', state),
 };

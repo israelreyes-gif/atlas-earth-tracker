@@ -21,6 +21,7 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 |---|---|
 | **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego". Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, y dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás). |
 | **Configuración** (`#settings`) | Una pantalla con una tarjeta por sección, todas con **− y +**: **Parcelas** (por tipo, con lo que gana cada una al día), **Insignias** (según cuántas tengas suma su porcentaje de aumento; tabla abajo), **Boosts** (x20 y x50, 1 hora por pulsación, hasta 5 h, solo uno activo a la vez, el + se bloquea si pasaría de 5 h, con cuenta atrás) y **Gastado** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $). Los cambios se guardan solos. No hay ajustes de las tarifas: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
+| **Progresión** (`#progress`) | Se abre con el icono de gráfica junto al engranaje. Pestañas **Hoy, Mes, 3 meses y Año** con escalas de 0,1 / 1 / 2 / 10 $ (si un valor se pasa, la escala se duplica). Arriba la **desviación** respecto a lo esperado (en $ y %, con las horas de boost hechas frente a las que tocaban); debajo la gráfica con la línea esperada (ámbar), la real (verde, continua hasta ahora y discontinua a tu ritmo) y el espacio entre ambas sombreado en verde (por encima) o rojo (por debajo); y abajo lo que se espera ganar al terminar el periodo. Todo en $ ganados desde el inicio del periodo (o desde el primer punto del historial si es posterior). |
 | **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo gastado no cambia (se toca con − y + en Configuración) y el saldo sale de total − gastado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
 
 ### Instalar como app (PWA)
@@ -82,10 +83,11 @@ index.html · manifest.webmanifest · sw.js · css/style.css
 icons/  icon.svg (original del icono) · icon-192/512.png · icon-maskable-512.png · apple-touch-icon.png
 js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
      editor.js (cambios de la configuración y guardado) · calc.js (cálculos) · format.js · html.js · type-style.js (colores)
-     screens/ home.js (resumen) · settings.js (configuración) · money.js · login.js
-     ui/      hero.js (tarjeta verde) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración)
+     screens/ home.js (resumen) · settings.js (configuración) · progress.js (progresión) · money.js · login.js
+     progress/ period.js (rangos y escalas) · boost-stats.js (boost del historial) · series.js (real y esperado)
+     ui/      hero.js (tarjeta verde) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
-         src/handlers/ index.js · getAll.js · saveState.js
+         src/handlers/ index.js · getAll.js · getHistory.js · saveState.js
 ```
 
 ## Datos (D1)
@@ -114,8 +116,21 @@ INSERT INTO account (id, total_earned, balance, updated_at) VALUES (1, 16.226300
 ```
 
 - **parcel_types**: `id`, `name`, `rate` ($ por segundo de una parcela), `count` (cuántas tengo), `position` (orden).
+- **history**: un punto por cada guardado (`at` = instante ISO UTC, `total_earned`, `boost_type`, `boost_seconds` = lo que queda de boost en ese instante, `rate` = $/s sin boost con las parcelas e insignias de ese momento). `saveState` lo escribe (con `INSERT OR REPLACE` por `at`, así reintentar no duplica) y `getHistory` lo devuelve. El historial empieza el día que se despliega: no se puede reconstruir lo anterior.
 - **account**: una sola fila (`id = 1`): `total_earned` ($, lo único que sube con el tiempo), `spent` ($ gastados; el saldo disponible es `total_earned − spent`; la columna antigua `balance` ya no se usa), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
 - **passport_levels**: `level`, `min_badges`, `max_badges`, `bonus` (0,05 = 5 %). Tabla del pasaporte de arriba.
+
+Para el historial de la pantalla Progresión (2026-11-10) se ejecutó:
+
+```sql
+CREATE TABLE history (
+  at TEXT PRIMARY KEY,
+  total_earned REAL NOT NULL,
+  boost_type INTEGER NOT NULL DEFAULT 0,
+  boost_seconds INTEGER NOT NULL DEFAULT 0,
+  rate REAL NOT NULL
+);
+```
 
 Para pasar a total + gastado (2026-11-10) se ejecutó:
 
@@ -146,7 +161,8 @@ Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acci�
 | Acción | Payload | Respuesta |
 |---|---|---|
 | `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, spent, badges, boost_type, boost_seconds, updated_at } }` |
-| `saveState` | `{ total_earned, spent, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), counts?: { idTipo: entero } }` | `{ ok }` |
+| `getHistory` | `{ since?: fecha ISO }` (por defecto, los últimos 400 días) | `{ points: [{ at, total_earned, boost_type, boost_seconds, rate }] }` |
+| `saveState` | `{ total_earned, spent, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 18000), rate?: número ($/s sin boost; si viene, se añade un punto al historial), counts?: { idTipo: entero } }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 
@@ -168,3 +184,11 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 12. **Cambios que dependan de la base de datos** (columnas o tablas nuevas, o borrar datos): dar primero el SQL, esperar a que el usuario diga "listo" y solo entonces subir el código.
 13. **Antes de decir que algo está implantado, comprobar en el repo que está desplegado** (build de GitHub Pages terminado y contenido publicado; despliegue del Worker si cambió). Mientras no lo esté, esperar y no avisar. Solo entonces decirle al usuario que pruebe.
 14. Commits a `main` (despliegan solos). Mensajes claros en español.
+
+## Progresión: cómo se calcula
+
+- **Real**: sale del historial. Entre dos puntos se usa el mismo modelo que el contador (ritmo × segundos, ×tipo de boost mientras dura el boost), así la línea tiene un "codo" cuando acaba un boost.
+- **Esperado**: ritmo base actual (parcelas e insignias de ahora) más la media de lo extra que dio el boost en los **30 días anteriores al inicio del periodo**. Si no hay datos de antes, se usa todo el historial que haya y la tarjeta de desviación avisa de con cuántos días se calculó.
+- **A tu ritmo real** (discontinua): ritmo base más lo extra medio del boost dentro del periodo.
+- **Desviación** = ganado hasta ahora − esperado hasta ahora. Las horas de boost cuentan el tiempo real de boost, sea x20 o x50.
+- Corregir el dinero también añade un punto, así que una corrección grande se ve como un salto en la línea real.

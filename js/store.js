@@ -1,6 +1,6 @@
 // Estado de la app: lo último que devolvió la API (con copia local para ir sin conexión).
 import { api } from './api.js';
-import { multiplierFor } from './calc.js';
+import { incomePerSecond, multiplierFor } from './calc.js';
 
 const CACHE_KEY = 'atlas-tracker-cache-v2';
 
@@ -61,6 +61,7 @@ export async function persist(extra = {}) {
     boost_type: account.boost_type,
     boost_seconds: account.boost_seconds,
     updated_at: account.updated_at,
+    rate: incomePerSecond(types, multiplierFor(account, state.levels)),
     ...extra,
   });
   saveCache({ types, account, passport_levels: state.levels });
