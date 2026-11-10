@@ -4,8 +4,6 @@ import { formatNumber } from '../format.js';
 const GREEN = '#1B6E45';
 const AMBER = '#B07A06';
 const RED = '#C0392B';
-const W = 350;
-const H = 300;
 const LEFT = 40;
 const RIGHT = 10;
 const TOP = 12;
@@ -14,7 +12,8 @@ const BOTTOM = 26;
 const path = (points) => `M${points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' L')}`;
 const shade = (points, color) => `<path d="${path(points)} Z" fill="${color}" opacity=".55"/>`;
 
-export function chartHtml(s) {
+// Dibuja la gráfica con el tamaño (en píxeles) del hueco donde va, para que no se deforme.
+export function chartSvg(s, W, H) {
   const { range, scale } = s;
   const x = (t) => LEFT + ((W - LEFT - RIGHT) * (t - range.start)) / (range.end - range.start);
   const y = (v) => TOP + (H - TOP - BOTTOM) * (1 - v / scale);
@@ -58,12 +57,12 @@ export function chartHtml(s) {
   svg += `<path d="${path([[nowX, y(s.gainedNow)], [x(range.end), y(s.endReal)]])}" fill="none" stroke="${GREEN}" stroke-width="3" stroke-dasharray="6 5"/>`;
   svg += `<circle cx="${nowX}" cy="${y(s.gainedNow)}" r="5" fill="${GREEN}"/></svg>`;
 
-  const item = (color, text, style = '') => `<span><i style="background:${color};${style}"></i>${text}</span>`;
-  return `${svg}
-    <div class="legend">
-      ${item(GREEN, 'Real hasta ahora (continua) y a tu ritmo (discontinua)')}
-      ${item(AMBER, 'Esperado: boosts de los 30 días anteriores')}
-      ${item(GREEN, 'Sombreado verde: por encima de lo esperado', 'opacity:.4')}
-      ${item(RED, 'Sombreado rojo: por debajo', 'opacity:.4')}
-    </div>`;
+  return svg;
+}
+
+export function legendHtml() {
+  const item = (swatch, text) => `<span>${swatch}${text}</span>`;
+  const line = (color, extra = '') => `<i style="background: ${color}; ${extra}"></i>`;
+  const dashed = `<i style="background: none; border-top: 3px dashed ${GREEN}; height: 0"></i>`;
+  return `<div class="legend">${item(line(GREEN), 'Real')}${item(dashed, 'A tu ritmo')}${item(line(AMBER), 'Esperado')}${item(line(GREEN, 'opacity: .45; height: 8px'), 'Por encima')}${item(line(RED, 'opacity: .45; height: 8px'), 'Por debajo')}</div>`;
 }

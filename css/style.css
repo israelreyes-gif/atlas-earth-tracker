@@ -325,3 +325,16 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .progress-body { display: flex; flex-direction: column; gap: 14px; }
 .legend { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); margin-top: 6px; }
 .legend i { display: inline-block; width: 18px; height: 4px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+
+/* Progresión sin scroll: la gráfica ocupa el hueco que queda */
+.screen.fit { height: 100dvh; overflow: hidden; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+.fit .progress-body { flex: 1; min-height: 0; gap: 10px; }
+.fit .chart-card { flex: 1; min-height: 0; padding: 10px; gap: 6px; }
+.chart-box { flex: 1; min-height: 0; }
+.chart-box svg { display: block; }
+.card.compact { padding: 12px 14px; gap: 6px; }
+.card.compact h2 { margin-bottom: 0; }
+.fit .seg button { height: 40px; }
+.fit .screen, .screen.fit { gap: 10px; }
+.legend { flex-direction: row; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; margin-top: 0; }
+.legend i { width: 14px; height: 4px; margin-right: 5px; }

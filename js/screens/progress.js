@@ -3,7 +3,7 @@ import { api } from '../api.js';
 import { PERIODS } from '../progress/period.js';
 import { buildProgress } from '../progress/series.js';
 import { currentMultiplier, state } from '../store.js';
-import { chartHtml } from '../ui/progress-chart.js';
+import { chartSvg, legendHtml } from '../ui/progress-chart.js';
 import { deviationHtml, endHtml } from '../ui/progress-cards.js';
 
 const BACK = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>';
@@ -11,6 +11,7 @@ const BACK = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke
 let selected = 'mes';
 
 export function renderProgress(container) {
+  container.classList.add('fit');
   container.innerHTML = `
     <div class="row">
       <a class="icon-btn" href="#home" aria-label="Volver al inicio">${BACK}</a>
@@ -42,8 +43,13 @@ export function renderProgress(container) {
     const title = PERIODS.find((p) => p.key === selected).endName;
     body.innerHTML = `
       ${deviationHtml(series)}
-      <section class="card" style="padding: 12px"><h2>Real frente a esperado</h2>${chartHtml(series)}</section>
+      <section class="card chart-card"><div class="chart-box" id="chart-box"></div>${legendHtml()}</section>
       ${endHtml(series, title)}`;
+    // La gráfica ocupa el hueco que queda: se mide y se dibuja a ese tamaño.
+    const box = body.querySelector('#chart-box');
+    const width = Math.floor(box.clientWidth);
+    const height = Math.max(150, Math.floor(box.clientHeight));
+    box.innerHTML = chartSvg(series, width, height);
   }
 
   async function load() {
@@ -69,7 +75,10 @@ export function renderProgress(container) {
 
   load();
   const refresh = setInterval(draw, 30000);
+  window.addEventListener('resize', draw);
   return () => {
+    container.classList.remove('fit');
+    window.removeEventListener('resize', draw);
     alive = false;
     clearInterval(refresh);
   };
