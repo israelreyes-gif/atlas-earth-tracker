@@ -99,7 +99,8 @@ export function renderHome(container) {
     const active = left > 0 ? state.account.boost_type : 0;
     if (delta > 0 && active !== 0 && active !== type) return;
     if (delta < 0 && active !== type) return;
-    const next = Math.min(BOOST_MAX_SECONDS, Math.max(0, left + delta * BOOST_STEP_SECONDS));
+    const next = Math.max(0, left + delta * BOOST_STEP_SECONDS);
+    if (next > BOOST_MAX_SECONDS) return;
     state.account = { ...state.account, boost_type: next > 0 ? type : 0, boost_seconds: next };
     afterChange();
   }

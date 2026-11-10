@@ -1,5 +1,5 @@
 // Tarjeta de boosts: x20 y x50 con − y + (1 hora por pulsación, hasta 5 h). Solo uno activo a la vez.
-import { BOOST_MAX_SECONDS, BOOST_TYPES, boostRemaining } from '../calc.js';
+import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, BOOST_TYPES, boostRemaining } from '../calc.js';
 import { formatDollar } from '../format.js';
 
 function clock(seconds) {
@@ -39,7 +39,7 @@ export function refreshBoosts(root, account, dailyNow) {
     const mine = active === type;
     row.querySelector('.boost-left').textContent = mine ? `Quedan ${clock(left)}` : 'Sin boost';
     row.querySelector('[data-delta="-1"]').disabled = !mine;
-    row.querySelector('[data-delta="1"]').disabled = (active !== 0 && !mine) || (mine && left >= BOOST_MAX_SECONDS);
+    row.querySelector('[data-delta="1"]').disabled = (active !== 0 && !mine) || (mine && left + BOOST_STEP_SECONDS > BOOST_MAX_SECONDS);
   }
 
   root.querySelector('#boost-note').textContent = active

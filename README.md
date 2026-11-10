@@ -59,7 +59,7 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
   | 5 | 101–9999 | 25 % |
 
   La ganancia por segundo es Σ(parcelas × tarifa) × (1 + aumento). El número de insignias lo apunta el usuario en la app (empieza en 0).
-- **Boosts**: x20 y x50. Solo puede haber **un tipo activo** a la vez. Se pueden acumular hasta **5 horas**; el x20 dura 1 hora cada vez que se activa. La ganancia por segundo durante el boost es Σ(parcelas × tarifa) × (1 + aumento de insignias) × boost (x20 con +5 % de insignias da x21; comprobado con capturas del juego).
+- **Boosts**: x20 y x50. Solo puede haber **un tipo activo** a la vez. Se pueden acumular hasta **5 horas**; el **+** se bloquea cuando al sumar una hora se pasaría de 5 h (con 4 h 25 min no se puede, hasta que baje de 4 h); el x20 dura 1 hora cada vez que se activa. La ganancia por segundo durante el boost es Σ(parcelas × tarifa) × (1 + aumento de insignias) × boost (x20 con +5 % de insignias da x21; comprobado con capturas del juego).
 - El juego muestra lo que da cada parcela **por segundo**; la app lo pasa a día (× 86.400) y a mes (× 30,44).
 - Tarifas base por segundo (de la captura de rarezas; fijas, solo se cambian en la base de datos): Común 0,0000000011 · Raro 0,0000000016 · Épico 0,0000000022 · Legendario 0,0000000044.
 - **Boost x20 confirmado** (2026-11-09): con él activo, el saldo subió unos 0,17 $/día frente a los 0,008 $/día del cálculo base (≈ x21, es decir x20 más el +5 % de insignias, a falta de confirmar cómo se combinan). Está pendiente de incluir.
