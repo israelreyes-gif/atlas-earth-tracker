@@ -33,7 +33,7 @@ export function totalParcels(types) {
 // Boost: account.boost_type (0, 20 o 50 = multiplicador) y account.boost_seconds (segundos que quedan en updated_at).
 export const BOOST_TYPES = [20, 50];
 export const BOOST_STEP_SECONDS = 3600;
-export const BOOST_MAX_SECONDS = 5 * 3600;
+export const BOOST_MAX_SECONDS = 6 * 3600;
 
 function secondsSince(account, now) {
   return Math.max(0, (now - new Date(account.updated_at)) / 1000);

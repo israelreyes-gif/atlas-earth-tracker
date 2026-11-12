@@ -16,7 +16,7 @@ export async function saveState(payload, env) {
     const boostType = requireNumber(payload.boost_type, 'boost_type', { integer: true });
     const boostSeconds = requireNumber(payload.boost_seconds, 'boost_seconds', { integer: true });
     if (![0, 20, 50].includes(boostType)) throw badRequest('boost_type debe ser 0, 20 o 50');
-    if (boostSeconds > 5 * 3600) throw badRequest('boost_seconds no puede superar 5 horas');
+    if (boostSeconds > 6 * 3600) throw badRequest('boost_seconds no puede superar 6 horas');
     statements.push(
       env.DB.prepare('UPDATE account SET boost_type = ?, boost_seconds = ? WHERE id = 1').bind(boostType, boostSeconds),
     );

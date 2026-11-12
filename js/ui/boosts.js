@@ -1,4 +1,4 @@
-// Tarjeta de boosts: x20 y x50 con − y + (1 hora por pulsación, hasta 5 h). Solo uno activo a la vez.
+// Tarjeta de boosts: x20 y x50 con − y + (1 hora por pulsación, hasta 6 h). Solo uno activo a la vez.
 import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, BOOST_TYPES, boostRemaining } from '../calc.js';
 import { formatDollar } from '../format.js';
 

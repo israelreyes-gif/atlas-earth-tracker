@@ -52,7 +52,7 @@ export function createEditor({ status, retry, onChange }) {
     afterChange();
   }
 
-  // + suma una hora al boost (solo si no hay otro tipo activo y sin pasar de 5 h); − quita una hora.
+  // + suma una hora al boost (solo si no hay otro tipo activo y sin pasar de 6 h); − quita una hora.
   function changeBoost(type, delta) {
     freezeMoney();
     const left = boostRemaining(state.account, new Date(state.account.updated_at));
