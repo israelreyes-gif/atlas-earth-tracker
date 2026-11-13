@@ -19,7 +19,7 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego" y debajo cuánto hace de la última corrección ("Última corrección: hace 2 días"); a partir de **7 días** sale en una franja ámbar con el aviso de comparar con el juego. Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás), y abajo la tarjeta **¿Qué hago con mi dinero?** con tres consejos (ver "Consejos"). Cabe entera en el iPhone 17 Pro Max sin scroll. |
+| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego" y debajo cuánto hace de la última corrección ("Última corrección: hace 2 días"); a partir de **7 días** sale en una franja ámbar con el aviso de comparar con el juego. Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás), y abajo dos tarjetas de color, **DINERO** y **ATLAS**, con el consejo (ver "Consejos"). Cabe entera en el iPhone 17 Pro Max sin scroll. |
 | **Configuración** (`#settings`) | Una pantalla con una tarjeta por sección, todas con **− y +**: **Parcelas** (por tipo, con lo que gana cada una al día), **Insignias** (según cuántas tengas suma su porcentaje de aumento; tabla abajo), **Boosts** (x20 y x50, 1 hora por pulsación, hasta 6 h, solo uno activo a la vez, el + se bloquea si pasaría de 6 h, con cuenta atrás) y **Gastado** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $). Los cambios se guardan solos. No hay ajustes de las tarifas: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
 | **Progresión** (`#progress`) | Se abre con el icono de gráfica junto al engranaje. Pestañas **Hoy, Mes, 3 meses y Año** con escalas de 0,1 / 1 / 2 / 10 $ (si un valor se pasa, la escala se duplica). Arriba la **desviación** respecto a lo esperado (en $ y %, con las horas de boost hechas frente a las que tocaban); debajo la gráfica con la línea esperada (ámbar), la real (verde, continua hasta ahora y discontinua a tu ritmo) y el espacio entre ambas sombreado en verde (por encima) o rojo (por debajo); y abajo lo que se espera ganar al terminar el periodo. La pantalla **no tiene scroll** en el iPhone: la gráfica ocupa el hueco que queda y se redibuja al cambiar el tamaño. Todo en $ ganados desde el inicio del periodo (o desde el primer punto del historial si es posterior). |
 | **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo gastado no cambia (se toca con − y + en Configuración) y el saldo sale de total − gastado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
@@ -86,7 +86,7 @@ js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · sto
      rules.js (reglas del juego para los consejos) · advice/ advice.js · badge-step.js · parcel-yield.js
      screens/ home.js (resumen) · settings.js (configuración) · progress.js (progresión) · money.js · login.js
      progress/ period.js (rangos y escalas) · boost-stats.js (boost del historial) · series.js (real y esperado)
-     ui/      advice-card.js (consejos) · hero.js (tarjeta verde) · corrected.js (aviso de última corrección) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
+     ui/      advice-card.js (zona de consejos) · advice-money.js (tarjeta DINERO) · advice-atlas.js (tarjeta ATLAS) · hero.js (tarjeta verde) · corrected.js (aviso de última corrección) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
          src/handlers/ index.js · getAll.js · getHistory.js · saveState.js
 ```
@@ -201,13 +201,17 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 - **Desviación** = ganado hasta ahora − esperado hasta ahora. Las horas de boost cuentan el tiempo real de boost, sea x20 o x50.
 - Corregir el dinero también añade un punto, así que una corrección grande se ve como un salto en la línea real.
 
-## Consejos (tarjeta "¿Qué hago con mi dinero?")
+## Consejos (tarjetas DINERO y ATLAS del inicio)
 
 Reglas fijas en `js/rules.js` (si el juego las cambia, se tocan solo ahí): parcela 100 AB (el tipo sale al azar), insignia 200 AB, 1 $ = 25 AB, retirada mínima 5 $, probabilidades de rareza Común 50 % / Raro 30 % / Épico 15 % / Legendario 5 % (pantalla "Detalles de rareza" del juego, confirmadas por el usuario el 2026-11-13).
 
 Supuestos: los AB gratis (diarios y de anuncios) **no se pueden volver a convertir en $**; la parcela media se calcula con el valor esperado (sin simulación) y todo se expresa en dólares al día. No se modelan comisiones ni incrementos de retirada porque no están verificados.
 
-Tres líneas:
+Dos tarjetas de color, una al lado de la otra, que se actualizan cada segundo y cambian de color, palabra y etiqueta según el consejo:
+- **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro y la etiqueta **GUÁRDALO** (dorada). Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**.
+- **ATLAS**: azul con **PARCELAS** y una barra con lo cerca que estás de que compense el escalón de insignias (renta base / punto de cambio, "insignias: 14 %"). Cuando compensa pasa a morado con **INSIGNIAS** y "faltan N · X AB". En el último escalón: **PARCELAS** e "insignias al máximo".
+
+El cálculo detrás (`buildAdvice`) sigue dando tres resultados; el tercero (canjear $ por AB) ya no se muestra en el inicio:
 - **Dólares**: guardar y retirar al llegar a 5 $; muestra cuánto falta y los días al ritmo actual **sin boost**.
 - **AB gratis**: parcelas **hasta que el siguiente escalón de insignias rinda más que esas mismas parcelas**. Un escalón se compara entero (por ejemplo, de 1 a 11 insignias son 2.000 AB para +5 %). Punto de cambio: renta base ≥ (coste del escalón en AB / 100) × rendimiento medio de una parcela × (1 + aumento actual) / (aumento que da el escalón). El boost multiplica por igual a los dos lados, así que no cambia el punto de cambio. Cuando se supera, la tarjeta dice "ve a por el escalón" con las insignias que faltan; en el último escalón (101 insignias o más) solo parcelas.
 - **Canjear $ por AB**: tiempo en recuperar cada dólar = 1 / ((25/100) × rendimiento medio de una parcela con tus insignias). Solo se recomienda si es menor de 365 días (`paybackHorizonDays`).

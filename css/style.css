@@ -343,7 +343,22 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .hero .hero-corrected { font-size: 12px; color: #E4F1E9; }
 .hero .hero-corrected.stale { margin-top: 6px; padding: 8px 10px; border-radius: 10px; background: var(--amber); color: var(--ink); font-size: 13px; font-weight: 700; }
 
-/* Consejos */
-.advice { gap: 4px; }
-.advice-line { font-size: 13px; line-height: 1.35; color: var(--muted); }
-.advice-line b { color: var(--ink); }
+/* Consejos: dos tarjetas de color */
+.advice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.advice-card { border-radius: 18px; padding: 12px; height: 172px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; background: var(--bg-c); border: 1px solid var(--line-c); }
+.advice-card.keep { --bg-c: #FBF0D4; --line-c: #EBD9A0; --ink-c: #B07A06; --title-c: #8A6100; }
+.advice-card.go { --bg-c: #DCEBE1; --line-c: #B7D4C3; --ink-c: #1B6E45; --title-c: #1B6E45; }
+.advice-card.parcels { --bg-c: #E1ECFB; --line-c: #BCD0F0; --ink-c: #2F6FD6; --title-c: #1F4FA3; }
+.advice-card.badges { --bg-c: #F0E5FA; --line-c: #D9C2EE; --ink-c: #8A3FC9; --title-c: #6B2FA0; }
+.advice-title { font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--title-c); }
+.advice-sub { font-size: 12px; line-height: 1.25; color: var(--muted); }
+.advice-ring { position: relative; width: 78px; height: 78px; }
+.advice-ring svg { display: block; }
+.advice-ring circle { fill: none; stroke-width: 9; }
+.advice-ring .ring-track { stroke: var(--line-c); }
+.advice-ring .ring-fill { stroke: var(--ink-c); stroke-linecap: round; }
+.advice-ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 16px 'Space Grotesk', system-ui, sans-serif; }
+.advice-chip { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 3px 12px; color: #fff; background: var(--ink-c); }
+.advice-word { font: 700 25px 'Space Grotesk', system-ui, sans-serif; line-height: 1.1; margin: 8px 0 2px; color: var(--ink-c); }
+.advice-bar { width: 100%; height: 10px; border-radius: 5px; overflow: hidden; background: var(--line-c); }
+.advice-bar i { display: block; height: 100%; border-radius: 5px; background: var(--ink-c); }

@@ -46,7 +46,7 @@ export function renderHome(container) {
       badges: state.account.badges,
       balance: value.balance,
       multiplier: currentMultiplier(),
-    }));
+    }), value.balance);
   }
 
   tickAll();
