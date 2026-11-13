@@ -7,5 +7,5 @@ export function adviceHtml() {
 }
 
 export function refreshAdvice(root, advice, balance) {
-  root.querySelector('#advice').innerHTML = moneyCardHtml(advice.withdraw, balance) + atlasCardHtml(advice.target);
+  root.querySelector('#advice').innerHTML = moneyCardHtml(advice.withdraw, advice.convert, balance) + atlasCardHtml(advice.target);
 }

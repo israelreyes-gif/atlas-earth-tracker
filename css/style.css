@@ -348,6 +348,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .advice-card { border-radius: 18px; padding: 12px; height: 172px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; background: var(--bg-c); border: 1px solid var(--line-c); }
 .advice-card.keep { --bg-c: #FBF0D4; --line-c: #EBD9A0; --ink-c: #B07A06; --title-c: #8A6100; }
 .advice-card.go { --bg-c: #DCEBE1; --line-c: #B7D4C3; --ink-c: #1B6E45; --title-c: #1B6E45; }
+.advice-card.swap { --bg-c: #D9EEF0; --line-c: #AFD5D9; --ink-c: #137A86; --title-c: #0F5F69; }
 .advice-card.parcels { --bg-c: #E1ECFB; --line-c: #BCD0F0; --ink-c: #2F6FD6; --title-c: #1F4FA3; }
 .advice-card.badges { --bg-c: #F0E5FA; --line-c: #D9C2EE; --ink-c: #8A3FC9; --title-c: #6B2FA0; }
 .advice-title { font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--title-c); }

@@ -208,10 +208,10 @@ Reglas fijas en `js/rules.js` (si el juego las cambia, se tocan solo ahí): parc
 Supuestos: los AB gratis (diarios y de anuncios) **no se pueden volver a convertir en $**; la parcela media se calcula con el valor esperado (sin simulación) y todo se expresa en dólares al día. Retirar no tiene comisiones (confirmado por el usuario el 2026-11-13); los incrementos de retirada no están verificados ni modelados.
 
 Dos tarjetas de color, una al lado de la otra, que se actualizan cada segundo y cambian de color, palabra y etiqueta según el consejo:
-- **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro y la etiqueta **GUÁRDALO** (dorada). Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**.
+- **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro y la etiqueta **GUÁRDALO** (dorada). Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**. Si algún día canjear $ por AB compensa (se recupera el dólar en 365 días o menos), pasa a azul turquesa con **CANJEA** y "recuperas 1 $ en N días"; tiene prioridad sobre GUÁRDALO y RETIRA. Con las tasas actuales no ocurre nunca.
 - **ATLAS**: azul con **PARCELAS** y una barra con lo cerca que estás de que compense el escalón de insignias (renta base / punto de cambio, "14 % para insignias"). Cuando compensa pasa a morado con **INSIGNIAS** y "faltan N · X AB". En el último escalón: **PARCELAS** e "insignias al máximo".
 
-El cálculo detrás (`buildAdvice`) sigue dando tres resultados; el tercero (canjear $ por AB) ya no se muestra en el inicio:
+El cálculo detrás (`buildAdvice`) da tres resultados:
 - **Dólares**: guardar y retirar al llegar a 5 $; muestra cuánto falta y los días al ritmo actual **sin boost**.
 - **AB gratis**: parcelas **hasta que el siguiente escalón de insignias rinda más que esas mismas parcelas**. Un escalón se compara entero (por ejemplo, de 1 a 11 insignias son 2.000 AB para +5 %). Punto de cambio: renta base ≥ (coste del escalón en AB / 100) × rendimiento medio de una parcela × (1 + aumento actual) / (aumento que da el escalón). El boost multiplica por igual a los dos lados, así que no cambia el punto de cambio. Cuando se supera, la tarjeta dice "ve a por el escalón" con las insignias que faltan; en el último escalón (101 insignias o más) solo parcelas.
 - **Canjear $ por AB**: tiempo en recuperar cada dólar = 1 / ((25/100) × rendimiento medio de una parcela con tus insignias). Solo se recomienda si es menor de 365 días (`paybackHorizonDays`).
