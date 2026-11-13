@@ -57,6 +57,7 @@ export async function persist(extra = {}) {
     counts,
     total_earned: account.total_earned,
     spent: account.spent,
+    withdrawn: account.withdrawn ?? 0,
     badges: account.badges,
     boost_type: account.boost_type,
     boost_seconds: account.boost_seconds,

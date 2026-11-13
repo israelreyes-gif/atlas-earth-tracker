@@ -1,4 +1,4 @@
-// Cambios de la configuración (parcelas, insignias, boosts, gastado): se aplican al estado y se guardan con espera.
+// Cambios de la configuración (parcelas, insignias, boosts, invertido, retirado): se aplican al estado y se guardan con espera.
 import { BOOST_MAX_SECONDS, BOOST_STEP_SECONDS, boostRemaining, freezeAccount } from './calc.js';
 import { currentMultiplier, persist, state } from './store.js';
 
@@ -65,14 +65,26 @@ export function createEditor({ status, retry, onChange }) {
     afterChange();
   }
 
-  // Apunta un gasto (+) o lo corrige (−): el total no cambia, el saldo baja o sube.
+  // Apunta una inversión (+) o la corrige (−): el total no cambia, el saldo baja o sube.
   function changeSpent(delta) {
     freezeMoney();
-    const balance = state.account.total_earned - state.account.spent;
+    const balance = state.account.total_earned - state.account.spent - (state.account.withdrawn ?? 0);
     if (delta > 0 && balance < delta) return;
     const next = Math.max(0, state.account.spent + delta);
     if (next === state.account.spent) return;
     state.account = { ...state.account, spent: next };
+    afterChange();
+  }
+
+  // Apunta una retirada (+) o la corrige (−): igual que lo invertido, el total no cambia y el saldo baja o sube.
+  function changeWithdrawn(delta) {
+    freezeMoney();
+    const withdrawn = state.account.withdrawn ?? 0;
+    const balance = state.account.total_earned - state.account.spent - withdrawn;
+    if (delta > 0 && balance < delta) return;
+    const next = Math.max(0, withdrawn + delta);
+    if (next === withdrawn) return;
+    state.account = { ...state.account, withdrawn: next };
     afterChange();
   }
 
@@ -83,5 +95,5 @@ export function createEditor({ status, retry, onChange }) {
     persist().catch(() => {});
   }
 
-  return { changeParcels, changeBadges, changeBoost, changeSpent, save, flush };
+  return { changeParcels, changeBadges, changeBoost, changeSpent, changeWithdrawn, save, flush };
 }

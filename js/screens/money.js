@@ -1,4 +1,4 @@
-// Corregir la renta total acumulada con la cifra que muestra el juego. Lo gastado no cambia: el saldo sale de total − gastado.
+// Corregir la renta total acumulada con la cifra que muestra el juego. Lo invertido y lo retirado no cambian: el saldo sale de total − invertido − retirado.
 import { boostRemaining, estimate } from '../calc.js';
 import { parseNumber, toInputValue } from '../format.js';
 import { currentMultiplier, persist, state } from '../store.js';
@@ -8,7 +8,7 @@ export function renderMoney(container) {
 
   container.innerHTML = `
     <h1>Corregir el dinero</h1>
-    <p class="muted">Copia la cifra que ves ahora en el juego. El saldo se calcula solo restando lo gastado.</p>
+    <p class="muted">Copia la cifra que ves ahora en el juego. El saldo se calcula solo restando lo invertido y lo retirado.</p>
     <form class="card" id="money-form" novalidate>
       <div class="field">
         <label for="total">Renta total acumulada ($)</label>
@@ -30,8 +30,8 @@ export function renderMoney(container) {
       message.textContent = 'Escribe la cifra como número.';
       return;
     }
-    if (total < state.account.spent) {
-      message.textContent = 'La renta total no puede ser menor que lo gastado.';
+    if (total < state.account.spent + (state.account.withdrawn ?? 0)) {
+      message.textContent = 'La renta total no puede ser menor que lo invertido más lo retirado.';
       return;
     }
 

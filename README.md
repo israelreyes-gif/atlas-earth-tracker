@@ -12,17 +12,18 @@ Para tener **mis números claros y realistas**. No sustituye a la app del juego:
 
 - **Renta total acumulada** ($): todo lo ganado desde el inicio (en el juego: *Información del jugador → Renta total acumulada*). Nunca baja.
 - **Saldo disponible** ($): lo que tengo para gastar (en el juego: la cifra de arriba del mapa). Sube con lo que gano y baja cuando gasto.
-- **Gastado** ($): lo que he gastado. Se guarda tal cual y no sube con el tiempo; solo cambia al apuntar un gasto con **− y +** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $, el − si no hay gasto). El saldo se calcula como renta total − gastado, así que con el tiempo solo se calcula el total. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $.
+- **Invertido** ($): lo que he invertido en AB (antes "Gastado"). Se guarda tal cual y no sube con el tiempo; solo cambia al apuntarlo con **− y +** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $, el − si no hay nada invertido).
+- **Retirado** ($): lo que he retirado del juego. Funciona igual que lo invertido (1 $ por pulsación, mismos bloqueos). El saldo se calcula como **renta total − invertido − retirado**, así que con el tiempo solo se calcula el total; retirar no cambia la renta total. Ejemplo real del 2026-11-09: 16,2263… − 0,2263… = 16 $.
 - **Ganancia al día y al mes**, calculada con mis parcelas por tipo.
 
 ### Pantallas
 
 | Pantalla | Qué hace |
 |---|---|
-| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible y gastado, que **suben cada segundo**, con el enlace "Corregir con las cifras del juego" y debajo cuánto hace de la última corrección ("Última corrección: hace 2 días"); a partir de **7 días** sale en una franja ámbar con el aviso de comparar con el juego. Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás), y abajo dos tarjetas de color, **DINERO** y **ATLAS**, con el consejo (ver "Consejos"). Cabe entera en el iPhone 17 Pro Max sin scroll. |
-| **Configuración** (`#settings`) | Una pantalla con una tarjeta por sección, todas con **− y +**: **Parcelas** (por tipo, con lo que gana cada una al día), **Insignias** (según cuántas tengas suma su porcentaje de aumento; tabla abajo), **Boosts** (x20 y x50, 1 hora por pulsación, hasta 6 h, solo uno activo a la vez, el + se bloquea si pasaría de 6 h, con cuenta atrás) y **Gastado** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $). Los cambios se guardan solos. No hay ajustes de las tarifas: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
+| **Inicio** (`#home`) | Resumen de lo que tengo, solo lectura. Arriba el título y un **engranaje** que abre la configuración. Tarjeta verde con renta total acumulada, saldo disponible, y debajo en dos columnas lo invertido y lo retirado; las dos primeras **suben cada segundo**, con el enlace "Corregir con las cifras del juego" y debajo cuánto hace de la última corrección ("Última corrección: hace 2 días"); a partir de **7 días** sale en una franja ámbar con el aviso de comparar con el juego. Debajo, ganancia al día y al mes, una fila con las cuatro parcelas (Común verde, Raro azul, Épico dorado, Legendario morado) con su número, dos fichas con las insignias (y su aumento) y el boost activo (con cuenta atrás), y abajo dos tarjetas de color, **DINERO** y **ATLAS**, con el consejo (ver "Consejos"). Cabe entera en el iPhone 17 Pro Max sin scroll. |
+| **Configuración** (`#settings`) | Una pantalla con una tarjeta por sección, todas con **− y +**: **Parcelas** (por tipo, con lo que gana cada una al día), **Insignias** (según cuántas tengas suma su porcentaje de aumento; tabla abajo), **Boosts** (x20 y x50, 1 hora por pulsación, hasta 6 h, solo uno activo a la vez, el + se bloquea si pasaría de 6 h, con cuenta atrás) **Invertido** y **Retirado** (1 $ por pulsación; el + se bloquea si el saldo es menor de 1 $). Los cambios se guardan solos. No hay ajustes de las tarifas: lo que da cada tipo por segundo **no cambia** y se fija en la base de datos (tabla `parcel_types`). |
 | **Progresión** (`#progress`) | Se abre con el icono de gráfica junto al engranaje. Pestañas **Hoy, Mes, 3 meses y Año** con escalas de 0,1 / 1 / 2 / 10 $ (si un valor se pasa, la escala se duplica). Arriba la **desviación** respecto a lo esperado (en $ y %, con las horas de boost hechas frente a las que tocaban); debajo la gráfica con la línea esperada (ámbar), la real (verde, continua hasta ahora y discontinua a tu ritmo) y el espacio entre ambas sombreado en verde (por encima) o rojo (por debajo); y abajo lo que se espera ganar al terminar el periodo. La pantalla **no tiene scroll** en el iPhone: la gráfica ocupa el hueco que queda y se redibuja al cambiar el tamaño. Todo en $ ganados desde el inicio del periodo (o desde el primer punto del historial si es posterior). |
-| **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo gastado no cambia (se toca con − y + en Configuración) y el saldo sale de total − gastado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
+| **Corregir el dinero** (`#money`) | Pide **una sola cifra**: la renta total acumulada que muestra el juego. Lo invertido y lo retirado no cambian (se tocan con − y + en Configuración) y el saldo sale de total − invertido − retirado, así que las dos cifras de dinero siempre terminan con los mismos decimales. |
 
 ### Instalar como app (PWA)
 
@@ -36,7 +37,7 @@ Sin pellizco/zoom (viewport `user-scalable=no`, `touch-action: pan-x pan-y` y bl
 
 - Es un **cálculo local**: dinero guardado + (lo que ganan las parcelas por segundo × segundos desde que se guardó). No usa la red ni escribe en D1 cada segundo.
 - D1 solo se escribe cuando **cambio algo**: pulso + o − (se guarda 0,8 s después del último toque) o corrijo el dinero.
-- Al pulsar + o − en Configuración (parcelas, insignias, boosts o gastado), la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
+- Al pulsar + o − en Configuración (parcelas, insignias, boosts, invertido o retirado), la app **fija primero el dinero que llevaba hasta ese instante** y desde ahí cuenta con el nuevo ritmo, para no perder lo ganado con las parcelas anteriores.
 - Es una **estimación con las tarifas base, el aumento de las insignias y el boost que se haya apuntado**. Si el boost no se apunta en la app, sale por debajo de lo real.
 - "Ganas al día" y "al mes" son **sin boost** (para tener una cifra estable); la tarjeta de boosts muestra lo que se gana al día con el boost activo. Si difiere del juego, se corrige en *Corregir el dinero*. En Inicio no se cambia nada: todo se configura en Configuración (engranaje).
 
@@ -86,7 +87,7 @@ js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · sto
      rules.js (reglas del juego para los consejos) · advice/ advice.js · badge-step.js · parcel-yield.js · eta-date.js (fecha de retirada)
      screens/ home.js (resumen) · settings.js (configuración) · progress.js (progresión) · money.js · login.js
      progress/ period.js (rangos y escalas) · boost-stats.js (boost del historial) · series.js (real y esperado)
-     ui/      advice-card.js (zona de consejos) · advice-money.js (tarjeta DINERO) · advice-atlas.js (tarjeta ATLAS) · hero.js (tarjeta verde) · corrected.js (aviso de última corrección) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
+     ui/      advice-card.js (zona de consejos) · advice-money.js (tarjeta DINERO) · advice-atlas.js (tarjeta ATLAS) · hero.js (tarjeta verde) · corrected.js (aviso de última corrección) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js · withdrawn.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
 worker/  wrangler.jsonc · src/ index.js · auth.js · json.js · validate.js
          src/handlers/ index.js · getAll.js · getHistory.js · saveState.js
 ```
@@ -118,7 +119,7 @@ INSERT INTO account (id, total_earned, balance, updated_at) VALUES (1, 16.226300
 
 - **parcel_types**: `id`, `name`, `rate` ($ por segundo de una parcela), `count` (cuántas tengo), `position` (orden).
 - **history**: un punto por cada guardado (`at` = instante ISO UTC, `total_earned`, `boost_type`, `boost_seconds` = lo que queda de boost en ese instante, `rate` = $/s sin boost con las parcelas e insignias de ese momento). `saveState` lo escribe (con `INSERT OR REPLACE` por `at`, así reintentar no duplica) y `getHistory` lo devuelve. El historial empieza el día que se despliega: no se puede reconstruir lo anterior.
-- **account**: una sola fila (`id = 1`): `total_earned` ($, lo único que sube con el tiempo), `spent` ($ gastados; el saldo disponible es `total_earned − spent`; la columna antigua `balance` ya no se usa), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`), `corrected_at` (instante ISO UTC de la última corrección con las cifras del juego, que alimenta el aviso del inicio) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
+- **account**: una sola fila (`id = 1`): `total_earned` ($, lo único que sube con el tiempo), `spent` ($ invertidos en AB), `withdrawn` ($ retirados del juego; el saldo disponible es `total_earned − spent − withdrawn`; la columna antigua `balance` ya no se usa), `badges` (número de insignias), `boost_type` (0 sin boost, 20 o 50) y `boost_seconds` (segundos de boost que quedan en `updated_at`), `corrected_at` (instante ISO UTC de la última corrección con las cifras del juego, que alimenta el aviso del inicio) y `updated_at` (instante ISO UTC al que corresponden esas cifras, los `count` y las insignias actuales).
 - **passport_levels**: `level`, `min_badges`, `max_badges`, `bonus` (0,05 = 5 %). Tabla del pasaporte de arriba.
 
 Para el aviso de última corrección (2026-11-10) se ejecutó:
@@ -147,6 +148,12 @@ ALTER TABLE account ADD COLUMN spent REAL NOT NULL DEFAULT 0;
 UPDATE account SET spent = total_earned - balance WHERE id = 1;
 ```
 
+Para añadir lo retirado (2026-11-13) se ejecutó:
+
+```sql
+ALTER TABLE account ADD COLUMN withdrawn REAL NOT NULL DEFAULT 0;
+```
+
 Para añadir los boosts (2026-11-10) se ejecutó:
 
 ```sql
@@ -168,9 +175,9 @@ Siempre `POST` con cuerpo `text/plain`: `{ "key": "<API_KEY>", "action": "<acci�
 
 | Acción | Payload | Respuesta |
 |---|---|---|
-| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, spent, badges, boost_type, boost_seconds, corrected_at, updated_at } }` |
+| `getAll` | — | `{ types: [{ id, name, rate, count }], passport_levels: [{ level, min_badges, max_badges, bonus }], account: { total_earned, spent, withdrawn, badges, boost_type, boost_seconds, corrected_at, updated_at } }` |
 | `getHistory` | `{ since?: fecha ISO }` (por defecto, los últimos 400 días) | `{ points: [{ at, total_earned, boost_type, boost_seconds, rate }] }` |
-| `saveState` | `{ total_earned, spent, updated_at, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 21600), corrected_at?: fecha ISO de la última corrección, rate?: número ($/s sin boost; si viene, se añade un punto al historial), counts?: { idTipo: entero } }` | `{ ok }` |
+| `saveState` | `{ total_earned, spent, updated_at, withdrawn?: número, badges?: entero, boost_type?: 0|20|50, boost_seconds?: entero (máx. 21600), corrected_at?: fecha ISO de la última corrección, rate?: número ($/s sin boost; si viene, se añade un punto al historial), counts?: { idTipo: entero } }` | `{ ok }` |
 
 Errores: `401` clave incorrecta, `400` datos o acción no válidos, `405` si no es POST.
 

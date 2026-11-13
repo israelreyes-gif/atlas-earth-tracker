@@ -12,6 +12,12 @@ export async function saveState(payload, env) {
       .bind(totalEarned, spent, updatedAt),
   ];
 
+  // Total retirado del juego (opcional para no romper versiones antiguas de la app).
+  if (payload.withdrawn !== undefined) {
+    const withdrawn = requireNumber(payload.withdrawn, 'withdrawn');
+    statements.push(env.DB.prepare('UPDATE account SET withdrawn = ? WHERE id = 1').bind(withdrawn));
+  }
+
   if (payload.boost_type !== undefined || payload.boost_seconds !== undefined) {
     const boostType = requireNumber(payload.boost_type, 'boost_type', { integer: true });
     const boostSeconds = requireNumber(payload.boost_seconds, 'boost_seconds', { integer: true });

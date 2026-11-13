@@ -7,7 +7,7 @@ export async function getAll(_payload, env) {
     'SELECT level, min_badges, max_badges, bonus FROM passport_levels ORDER BY level ASC',
   ).all();
   const account = await env.DB.prepare(
-    'SELECT total_earned, spent, badges, boost_type, boost_seconds, corrected_at, updated_at FROM account WHERE id = 1',
+    'SELECT total_earned, spent, withdrawn, badges, boost_type, boost_seconds, corrected_at, updated_at FROM account WHERE id = 1',
   ).first();
 
   return { types: types.results, passport_levels: levels.results, account };

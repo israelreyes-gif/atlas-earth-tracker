@@ -284,7 +284,9 @@ h2 { margin: 0; font-size: 16px; font-weight: 700; }
 .hero { gap: 2px; }
 .hero .hero-total { font-size: 34px; line-height: 1.15; margin-bottom: 10px; font-variant-numeric: tabular-nums; }
 .hero .hero-balance { font-size: 28px; line-height: 1.15; font-variant-numeric: tabular-nums; }
-.hero .hero-spent { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.25); font-size: 18px; }
+.hero .hero-spent { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.25); font-size: 18px; }
+.hero .hero-spent-item { display: flex; flex-direction: column; gap: 2px; }
+.hero .hero-spent-item.right { text-align: right; }
 .hero .hero-link { color: #FFFFFF; font-size: 13px; font-weight: 600; margin-top: 10px; min-height: 24px; }
 .stat .value { font-size: 20px; }
 .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
