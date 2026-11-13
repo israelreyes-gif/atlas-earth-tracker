@@ -205,7 +205,7 @@ Instrucciones permanentes para quien trabaje en este repo (incluido Claude):
 
 Reglas fijas en `js/rules.js` (si el juego las cambia, se tocan solo ahí): parcela 100 AB (el tipo sale al azar), insignia 200 AB, 1 $ = 25 AB, retirada mínima 5 $, probabilidades de rareza Común 50 % / Raro 30 % / Épico 15 % / Legendario 5 % (pantalla "Detalles de rareza" del juego, confirmadas por el usuario el 2026-11-13).
 
-Supuestos: los AB gratis (diarios y de anuncios) **no se pueden volver a convertir en $**; la parcela media se calcula con el valor esperado (sin simulación) y todo se expresa en dólares al día. No se modelan comisiones ni incrementos de retirada porque no están verificados.
+Supuestos: los AB gratis (diarios y de anuncios) **no se pueden volver a convertir en $**; la parcela media se calcula con el valor esperado (sin simulación) y todo se expresa en dólares al día. Retirar no tiene comisiones (confirmado por el usuario el 2026-11-13); los incrementos de retirada no están verificados ni modelados.
 
 Dos tarjetas de color, una al lado de la otra, que se actualizan cada segundo y cambian de color, palabra y etiqueta según el consejo:
 - **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro y la etiqueta **GUÁRDALO** (dorada). Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**.
