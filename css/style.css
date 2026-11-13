@@ -363,4 +363,4 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .advice-chip { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 3px 12px; color: #fff; background: var(--ink-c); }
 .advice-word { font: 700 25px 'Space Grotesk', system-ui, sans-serif; line-height: 1.1; margin: 8px 0 2px; color: var(--ink-c); }
 .advice-bar { width: 100%; height: 10px; border-radius: 5px; overflow: hidden; background: var(--line-c); }
-.advice-bar i { display: block; height: 100%; border-radius: 5px; background: var(--ink-c); }
+.advice-bar i { display: block; height: 100%; border-radius: 0; background: var(--ink-c); }
