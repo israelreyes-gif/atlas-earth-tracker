@@ -1,7 +1,9 @@
 // Inicio: resumen de la cuenta. Dinero arriba (en directo), ganancia al día y al mes, parcelas, insignias y boost.
-import { dailyIncome, monthlyIncome, totalParcels } from '../calc.js';
+import { buildAdvice } from '../advice/advice.js';
+import { dailyIncome, estimate, monthlyIncome, totalParcels } from '../calc.js';
 import { formatDollar, formatNumber } from '../format.js';
 import { currentMultiplier, state } from '../store.js';
+import { adviceHtml, refreshAdvice } from '../ui/advice-card.js';
 import { heroHtml, tickHero } from '../ui/hero.js';
 import { parcelChipsHtml } from '../ui/parcel-chips.js';
 import { refreshSummary, summaryHtml } from '../ui/summary.js';
@@ -30,12 +32,21 @@ export function renderHome(container) {
       <span class="muted">${formatNumber(totalParcels(state.types))} en total</span>
     </div>
     ${parcelChipsHtml(state.types)}
-    ${summaryHtml()}`;
+    ${summaryHtml()}
+    ${adviceHtml()}`;
 
   // Cada segundo: cifras de dinero y cuenta atrás del boost.
   function tickAll() {
     tickHero(container);
     refreshSummary(container, state.account, state.levels);
+    const value = estimate(state.account, state.types, currentMultiplier(), new Date());
+    refreshAdvice(container, buildAdvice({
+      types: state.types,
+      levels: state.levels,
+      badges: state.account.badges,
+      balance: value.balance,
+      multiplier: currentMultiplier(),
+    }));
   }
 
   tickAll();

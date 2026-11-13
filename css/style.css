@@ -342,3 +342,8 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 /* Aviso de última corrección */
 .hero .hero-corrected { font-size: 12px; color: #E4F1E9; }
 .hero .hero-corrected.stale { margin-top: 6px; padding: 8px 10px; border-radius: 10px; background: var(--amber); color: var(--ink); font-size: 13px; font-weight: 700; }
+
+/* Consejos */
+.advice { gap: 4px; }
+.advice-line { font-size: 13px; line-height: 1.35; color: var(--muted); }
+.advice-line b { color: var(--ink); }
