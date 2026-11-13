@@ -358,7 +358,7 @@ a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid 
 .advice-ring svg { display: block; }
 .advice-ring circle { fill: none; stroke-width: 9; }
 .advice-ring .ring-track { stroke: var(--line-c); }
-.advice-ring .ring-fill { stroke: var(--ink-c); stroke-linecap: round; }
+.advice-ring .ring-fill { stroke: var(--ink-c); stroke-linecap: butt; }
 .advice-ring span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 700 16px 'Space Grotesk', system-ui, sans-serif; }
 .advice-chip { font-size: 12px; font-weight: 800; border-radius: 999px; padding: 3px 12px; color: #fff; background: var(--ink-c); }
 .advice-word { font: 700 25px 'Space Grotesk', system-ui, sans-serif; line-height: 1.1; margin: 8px 0 2px; color: var(--ink-c); }
