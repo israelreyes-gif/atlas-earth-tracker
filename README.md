@@ -83,7 +83,7 @@ index.html · manifest.webmanifest · sw.js · css/style.css
 icons/  icon.svg (original del icono) · icon-192/512.png · icon-maskable-512.png · apple-touch-icon.png
 js/  main.js (rutas) · config.js (URL de la API) · api.js · session.js · store.js
      editor.js (cambios de la configuración y guardado) · calc.js (cálculos) · format.js · html.js · type-style.js (colores)
-     rules.js (reglas del juego para los consejos) · advice/ advice.js · badge-step.js · parcel-yield.js
+     rules.js (reglas del juego para los consejos) · advice/ advice.js · badge-step.js · parcel-yield.js · eta-date.js (fecha de retirada)
      screens/ home.js (resumen) · settings.js (configuración) · progress.js (progresión) · money.js · login.js
      progress/ period.js (rangos y escalas) · boost-stats.js (boost del historial) · series.js (real y esperado)
      ui/      advice-card.js (zona de consejos) · advice-money.js (tarjeta DINERO) · advice-atlas.js (tarjeta ATLAS) · hero.js (tarjeta verde) · corrected.js (aviso de última corrección) · parcel-chips.js (fichas del inicio) · summary.js (insignias y boost del inicio) · parcel-rows.js · badges.js · boosts.js · spent.js (los de la configuración) · progress-chart.js · progress-cards.js (progresión)
@@ -208,7 +208,7 @@ Reglas fijas en `js/rules.js` (si el juego las cambia, se tocan solo ahí): parc
 Supuestos: los AB gratis (diarios y de anuncios) **no se pueden volver a convertir en $**; la parcela media se calcula con el valor esperado (sin simulación) y todo se expresa en dólares al día. Retirar no tiene comisiones (confirmado por el usuario el 2026-11-13); los incrementos de retirada no están verificados ni modelados.
 
 Dos tarjetas de color, una al lado de la otra, que se actualizan cada segundo y cambian de color, palabra y etiqueta según el consejo:
-- **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro y la etiqueta **GUÁRDALO** (dorada). Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**. Si algún día canjear $ por AB compensa (se recupera el dólar en 365 días o menos), pasa a azul turquesa con **CANJEA** y "recuperas 1 $ en N días"; tiene prioridad sobre GUÁRDALO y RETIRA. Con las tasas actuales no ocurre nunca.
+- **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro la etiqueta **GUÁRDALO** (dorada) y la fecha estimada en la que llegas a 5 $ ("llegas el 5 jun 2028"), calculada al ritmo actual **sin boost**. Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**. Si algún día canjear $ por AB compensa (se recupera el dólar en 365 días o menos), pasa a azul turquesa con **CANJEA** y "recuperas 1 $ en N días"; tiene prioridad sobre GUÁRDALO y RETIRA. Con las tasas actuales no ocurre nunca.
 - **ATLAS**: azul con **PARCELAS** y una barra con lo cerca que estás de que compense el escalón de insignias (renta base / punto de cambio, "14 % para insignias"). Cuando compensa pasa a morado con **INSIGNIAS** y "faltan N · X AB". En el último escalón: **PARCELAS** e "insignias al máximo".
 
 El cálculo detrás (`buildAdvice`) da tres resultados:

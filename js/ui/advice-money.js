@@ -1,6 +1,7 @@
 // Tarjeta DINERO: aro de progreso hacia la retirada mínima y "GUÁRDALO", "RETIRA" o, si compensa, "CANJEA".
 import { formatDollar, formatNumber } from '../format.js';
 import { RULES } from '../rules.js';
+import { etaDate } from '../advice/eta-date.js';
 
 const CIRCUMFERENCE = 201; // 2 * PI * radio 32
 
@@ -13,7 +14,9 @@ function duration(days) {
 function view(withdraw, convert, balance) {
   if (convert.worth) return { cls: 'swap', figure: formatDollar(balance), sub: `recuperas 1 $ en ${duration(convert.paybackDays)}`, chip: 'CANJEA' };
   if (withdraw.canWithdraw) return { cls: 'go', figure: formatDollar(balance), sub: 'listo para retirar', chip: 'RETIRA' };
-  return { cls: 'keep', figure: formatDollar(withdraw.missing), sub: 'faltan para retirar', chip: 'GUÁRDALO' };
+  const eta = etaDate(withdraw.days);
+  const sub = eta ? `faltan para retirar<br><b>llegas el ${eta}</b>` : 'faltan para retirar';
+  return { cls: 'keep', figure: formatDollar(withdraw.missing), sub, chip: 'GUÁRDALO' };
 }
 
 export function moneyCardHtml(withdraw, convert, balance) {
