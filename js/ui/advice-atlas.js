@@ -8,7 +8,7 @@ function view(target) {
     return { cls: 'badges', word: 'INSIGNIAS', progress: 1, sub: `faltan ${formatNumber(step.missing)} · ${formatNumber(step.costAB)} AB` };
   }
   const progress = Math.min(1, target.baseDaily / target.breakEven);
-  return { cls: 'parcels', word: 'PARCELAS', progress, sub: `insignias: ${formatNumber(Math.round(progress * 100))} %` };
+  return { cls: 'parcels', word: 'PARCELAS', progress, sub: `${formatNumber(Math.round(progress * 100))} % para insignias` };
 }
 
 export function atlasCardHtml(target) {

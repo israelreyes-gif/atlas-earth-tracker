@@ -209,7 +209,7 @@ Supuestos: los AB gratis (diarios y de anuncios) **no se pueden volver a convert
 
 Dos tarjetas de color, una al lado de la otra, que se actualizan cada segundo y cambian de color, palabra y etiqueta según el consejo:
 - **DINERO**: aro de progreso hacia los 5 $ con lo que falta en el centro y la etiqueta **GUÁRDALO** (dorada). Al llegar a 5 $ pasa a verde con el saldo, "listo para retirar" y **RETIRA**.
-- **ATLAS**: azul con **PARCELAS** y una barra con lo cerca que estás de que compense el escalón de insignias (renta base / punto de cambio, "insignias: 14 %"). Cuando compensa pasa a morado con **INSIGNIAS** y "faltan N · X AB". En el último escalón: **PARCELAS** e "insignias al máximo".
+- **ATLAS**: azul con **PARCELAS** y una barra con lo cerca que estás de que compense el escalón de insignias (renta base / punto de cambio, "14 % para insignias"). Cuando compensa pasa a morado con **INSIGNIAS** y "faltan N · X AB". En el último escalón: **PARCELAS** e "insignias al máximo".
 
 El cálculo detrás (`buildAdvice`) sigue dando tres resultados; el tercero (canjear $ por AB) ya no se muestra en el inicio:
 - **Dólares**: guardar y retirar al llegar a 5 $; muestra cuánto falta y los días al ritmo actual **sin boost**.
