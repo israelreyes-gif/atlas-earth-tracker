@@ -15,8 +15,8 @@ function view(withdraw, convert, balance) {
   if (convert.worth) return { cls: 'swap', figure: formatDollar(balance), sub: `recuperas 1 $ en ${duration(convert.paybackDays)}`, chip: 'CANJEA' };
   if (withdraw.canWithdraw) return { cls: 'go', figure: formatDollar(balance), sub: 'listo para retirar', chip: 'RETIRA' };
   const eta = etaDate(withdraw.days);
-  const sub = eta ? `<b>llegas el ${eta}</b>` : 'faltan para retirar';
-  return { cls: 'keep', figure: formatDollar(withdraw.missing), sub, chip: 'GUÁRDALO' };
+  const sub = eta ? `<b>llegas el ${eta}</b>` : `de ${formatDollar(RULES.minimumWithdrawal)} para retirar`;
+  return { cls: 'keep', figure: formatDollar(balance), sub, chip: 'GUÁRDALO' };
 }
 
 export function moneyCardHtml(withdraw, convert, balance) {
